@@ -228,7 +228,7 @@ class _SignUpState extends State<SignUp> {
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
                                 primary: Color(0xff2E5F3B),
-                                minimumSize: const Size.fromHeight(50),
+                                minimumSize: const Size.fromHeight(55),
                                 textStyle: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
