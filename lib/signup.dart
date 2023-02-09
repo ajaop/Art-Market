@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'database_services.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -18,6 +22,16 @@ class _SignUpState extends State<SignUp> {
   final _passwordController = TextEditingController();
   bool _loading = false;
   bool _obscureText = true;
+  DatabaseService service = DatabaseService();
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,10 +249,21 @@ class _SignUpState extends State<SignUp> {
                                     fontFamily: 'OpenSans',
                                     fontWeight: FontWeight.bold)),
                             onPressed: !_loading
-                                ? () {
+                                ? () async {
                                     if (_formKey.currentState!.validate()) {
                                       setState(() {
                                         _loading = true;
+                                      });
+                                      await service.register(
+                                          _firstNameController.text.toString(),
+                                          _lastNameController.text.toString(),
+                                          _emailController.text.toString(),
+                                          _passwordController.text.toString(),
+                                          context,
+                                          _messangerKey);
+
+                                      setState(() {
+                                        _loading = false;
                                       });
                                     }
                                   }

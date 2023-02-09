@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "150267985187",
+    "project_id": "art-market-c662c",
+    "storage_bucket": "art-market-c662c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150267985187:android:fc6a0341db7a26746f6096",
+        "android_client_info": {
+          "package_name": "com.example.art_market"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "150267985187-37nqud0peuobvjp97ns3n2a05e3v50f6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJLiTje80_BPyVtvp7DjowAOffzo5Ol84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "150267985187-37nqud0peuobvjp97ns3n2a05e3v50f6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
