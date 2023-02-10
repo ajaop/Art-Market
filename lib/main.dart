@@ -1,4 +1,5 @@
 import 'package:art_market/onBoarding.dart';
+import 'package:art_market/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'homepage.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           ? const OnBoardingPage()
           : const SignIn(),
       '/homepage': (context) => const HomePage(),
+      '/signup': (context) => const SignUp(),
     });
   }
 }

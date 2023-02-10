@@ -1,13 +1,17 @@
+import 'package:art_market/signup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-class DatabaseService {
+import 'user_details.dart';
+
+class AuthService {
   FirebaseFirestore _db = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
 
-  DatabaseService() {
+  AuthService() {
     user = auth.currentUser;
   }
 
@@ -40,7 +44,8 @@ class DatabaseService {
             bool addData = await sendToDB(firstName, lastName, emailText);
             print('add data ${addData.toString()}');
             if (addData == true) {
-              Navigator.pushReplacementNamed(context, '/homepage');
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/homepage', (Route<dynamic> route) => false);
             } else {
               error('Error signing up user.', _messangerKey);
             }
@@ -60,6 +65,8 @@ class DatabaseService {
   }
 
   Future<void> login(username, pass, context, _messangerKey) async {
+    final userDet = UserDetails(username, pass);
+
     try {
       final credential = await auth
           .signInWithEmailAndPassword(email: username, password: pass)
@@ -68,7 +75,11 @@ class DatabaseService {
         if (userExist == true) {
           Navigator.pushReplacementNamed(context, '/homepage');
         } else {
-          Navigator.pushReplacementNamed(context, '/homepage');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const SignUp(),
+                  settings: RouteSettings(arguments: userDet)));
         }
       });
 
@@ -127,6 +138,19 @@ class DatabaseService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  void checkIfLoggedIn(context) {
+    final User? user = auth.currentUser;
+
+    if (user?.uid.isEmpty == null) {
+      print("Log in");
+    } else {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/homepage', (Route<dynamic> route) => false);
+      });
     }
   }
 

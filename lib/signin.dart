@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import 'auth_services.dart';
+
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
 
@@ -16,6 +18,13 @@ class _SignInState extends State<SignIn> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true, _loading = false;
+  AuthService authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    authService.checkIfLoggedIn(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,10 +157,20 @@ class _SignInState extends State<SignIn> {
                                   fontFamily: 'OpenSans',
                                   fontWeight: FontWeight.bold)),
                           onPressed: !_loading
-                              ? () {
+                              ? () async {
                                   if (_formKey.currentState!.validate()) {
                                     setState(() {
                                       _loading = true;
+                                    });
+
+                                    await authService.login(
+                                        _emailController.text.toString(),
+                                        _passwordController.text.toString(),
+                                        context,
+                                        _messangerKey);
+
+                                    setState(() {
+                                      _loading = false;
                                     });
                                   }
                                 }

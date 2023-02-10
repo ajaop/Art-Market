@@ -1,10 +1,11 @@
+import 'package:art_market/user_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'database_services.dart';
+import 'auth_services.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -20,9 +21,9 @@ class _SignUpState extends State<SignUp> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _loading = false;
-  bool _obscureText = true;
-  DatabaseService service = DatabaseService();
+  bool _loading = false, _obscureText = true, _userSigningUp = true;
+  String buttonText = 'Create Account', titleText = 'Sign Up';
+  AuthService authService = AuthService();
 
   @override
   void dispose() {
@@ -35,6 +36,8 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
+    getUserValues();
+
     return MaterialApp(
       scaffoldMessengerKey: _messangerKey,
       theme: ThemeData().copyWith(
@@ -57,7 +60,7 @@ class _SignUpState extends State<SignUp> {
                       children: [
                         Center(
                           child: Text(
-                            'Sign Up',
+                            titleText,
                             style: TextStyle(
                                 letterSpacing: 0.6,
                                 fontSize: 30.0,
@@ -158,6 +161,7 @@ class _SignUpState extends State<SignUp> {
                           height: 4.0,
                         ),
                         TextFormField(
+                          enabled: _userSigningUp,
                           controller: _emailController,
                           decoration: InputDecoration(
                             prefixIcon: Icon(Icons.mail_outline),
@@ -196,6 +200,7 @@ class _SignUpState extends State<SignUp> {
                           height: 4.0,
                         ),
                         TextFormField(
+                          enabled: _userSigningUp,
                           controller: _passwordController,
                           obscureText: _obscureText,
                           decoration: InputDecoration(
@@ -254,7 +259,7 @@ class _SignUpState extends State<SignUp> {
                                       setState(() {
                                         _loading = true;
                                       });
-                                      await service.register(
+                                      await authService.register(
                                           _firstNameController.text.toString(),
                                           _lastNameController.text.toString(),
                                           _emailController.text.toString(),
@@ -268,7 +273,7 @@ class _SignUpState extends State<SignUp> {
                                     }
                                   }
                                 : null,
-                            child: const Text('Create Account')),
+                            child: Text(buttonText)),
                         const SizedBox(
                           height: 10.0,
                         ),
@@ -294,7 +299,7 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
         if (_loading)
-          Center(
+          const Center(
             child: SpinKitSquareCircle(
               color: Color(0xff2E5F3B),
               size: 100.0,
@@ -302,5 +307,20 @@ class _SignUpState extends State<SignUp> {
           )
       ]),
     );
+  }
+
+  void getUserValues() {
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      final userDetails =
+          ModalRoute.of(context)!.settings.arguments as UserDetails;
+
+      _emailController.text = userDetails.email;
+      _passwordController.text = userDetails.password;
+      setState(() {
+        _userSigningUp = false;
+        titleText = 'Complete Sign Up';
+        buttonText = 'Submit';
+      });
+    }
   }
 }
