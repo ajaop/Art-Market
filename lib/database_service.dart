@@ -1,3 +1,4 @@
+import 'package:art_market/ArtItems.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,37 @@ class DatabaseService {
         .onError((error, stackTrace) => displayError(error, _messengerKey));
 
     return imageText;
+  }
+
+  Future<List<ArtItems>> retrieveArt() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _db.collection("arts").get();
+
+    return snapshot.docs
+        .map((docSnapshot) => ArtItems.fromDocumentSnapshot(docSnapshot))
+        .toList();
+  }
+
+  Future<List<ArtItems>> retrieveArtBySketches() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await _db
+        .collection("arts")
+        .where('ArtType', isEqualTo: 'Sketch')
+        .get();
+
+    return snapshot.docs
+        .map((docSnapshot) => ArtItems.fromDocumentSnapshot(docSnapshot))
+        .toList();
+  }
+
+  Future<List<ArtItems>> retrieveArtByPaintings() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await _db
+        .collection("arts")
+        .where('ArtType', isEqualTo: 'Painting')
+        .get();
+
+    return snapshot.docs
+        .map((docSnapshot) => ArtItems.fromDocumentSnapshot(docSnapshot))
+        .toList();
   }
 
   void displayError(errorMessage, _messangerKey) {

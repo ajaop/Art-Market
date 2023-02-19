@@ -1,8 +1,12 @@
+import 'dart:ui';
+
+import 'package:art_market/ArtItems.dart';
 import 'package:art_market/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -14,8 +18,13 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
   DatabaseService databaseService = DatabaseService();
+  Future<List<ArtItems>>? itemsList;
+  List<ArtItems>? retrievedItemsList;
   String profileImageText = '';
   bool _loading = false;
+  dynamic allBtnColor = Color(0xff69B47D),
+      sketchBtnColor = Colors.white,
+      paintingBtnColor = Colors.white;
 
   @override
   void initState() {
@@ -28,7 +37,7 @@ class _DashboardState extends State<Dashboard> {
     return MaterialApp(
       scaffoldMessengerKey: _messangerKey,
       theme: ThemeData().copyWith(
-        scaffoldBackgroundColor: Color(0xffEEF7F0),
+        scaffoldBackgroundColor: Colors.white,
         colorScheme:
             ThemeData().colorScheme.copyWith(primary: Color(0xff95C2A1)),
       ),
@@ -60,51 +69,166 @@ class _DashboardState extends State<Dashboard> {
                       ],
                     ),
                     SizedBox(
-                      height: 20.0,
+                      height: 30.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              allBtnColor = Color(0xff69B47D);
+                              sketchBtnColor = Colors.white;
+                              paintingBtnColor = Colors.white;
+                              retrievedItemsList = [];
+                              _loading = true;
+                            });
+
+                            retrievedItemsList =
+                                await databaseService.retrieveArt();
+
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text('All',
+                              style: TextStyle(color: Color(0xff1B3823))),
+                          style: ElevatedButton.styleFrom(
+                              primary: allBtnColor,
+                              shape: const StadiumBorder(),
+                              side: BorderSide(
+                                  color: Color(0xff418653), width: 2)),
+                        ),
+                        SizedBox(
+                          width: 20.0,
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              allBtnColor = Colors.white;
+                              sketchBtnColor = Color(0xff69B47D);
+                              paintingBtnColor = Colors.white;
+                              retrievedItemsList = [];
+                              _loading = true;
+                            });
+
+                            retrievedItemsList =
+                                await databaseService.retrieveArtBySketches();
+
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text('Sketches',
+                              style: TextStyle(color: Color(0xff1B3823))),
+                          style: ElevatedButton.styleFrom(
+                              primary: sketchBtnColor,
+                              shape: const StadiumBorder(),
+                              side: BorderSide(
+                                  color: Color(0xff418653), width: 2)),
+                        ),
+                        SizedBox(
+                          width: 20.0,
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              allBtnColor = Colors.white;
+                              sketchBtnColor = Colors.white;
+                              paintingBtnColor = Color(0xff69B47D);
+                              retrievedItemsList = [];
+                              _loading = true;
+                            });
+
+                            retrievedItemsList =
+                                await databaseService.retrieveArtByPaintings();
+
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text(
+                            'Paintings',
+                            style: TextStyle(color: Color(0xff1B3823)),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              primary: paintingBtnColor,
+                              shape: const StadiumBorder(),
+                              side: BorderSide(
+                                  color: Color(0xff418653), width: 2)),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 25.0,
                     ),
                     Expanded(
                         child: ClipRRect(
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        topLeft: Radius.circular(10),
-                      ),
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10)),
                       child: RefreshIndicator(
                         onRefresh: () {
                           return getAllData();
                         },
-                        child: GridView.custom(
-                          shrinkWrap: true,
-                          gridDelegate: SliverWovenGridDelegate.count(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 4,
-                            crossAxisSpacing: 4,
-                            pattern: [
-                              const WovenGridTile(1),
-                              const WovenGridTile(
-                                5 / 7,
-                                crossAxisRatio: 0.9,
-                                alignment: AlignmentDirectional.centerEnd,
-                              ),
-                            ],
-                          ),
-                          childrenDelegate:
-                              SliverChildBuilderDelegate((context, index) {
-                            return Container(
-                              decoration: const BoxDecoration(
-                                  color: Color(0xffC9E4D0),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(15))),
-                              child: ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(15)),
-                                child: FadeInImage.memoryNetwork(
-                                  placeholder: kTransparentImage,
-                                  image: imageList[index],
-                                  fit: BoxFit.cover,
+                        child: FutureBuilder(
+                          future: itemsList,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<ArtItems>> snapshot) {
+                            if (snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                retrievedItemsList?.isEmpty == null) {
+                              const Center(
+                                child: Text(
+                                  'No Art Yet',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 20.0),
                                 ),
-                              ),
-                            );
-                          }, childCount: imageList.length),
+                              );
+                            }
+
+                            if (retrievedItemsList?.isEmpty ?? true) {
+                              return const Center(
+                                child: Text(
+                                  'No Art Yet',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 20.0),
+                                ),
+                              );
+                            }
+
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return GridView.custom(
+                                shrinkWrap: true,
+                                gridDelegate: SliverWovenGridDelegate.count(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 4,
+                                  crossAxisSpacing: 4,
+                                  pattern: [
+                                    const WovenGridTile(1),
+                                    const WovenGridTile(
+                                      5 / 7,
+                                      crossAxisRatio: 0.9,
+                                      alignment: AlignmentDirectional.centerEnd,
+                                    ),
+                                  ],
+                                ),
+                                childrenDelegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                  return CardArtItem(
+                                      index: index,
+                                      retrievedArtItems: retrievedItemsList);
+                                }, childCount: retrievedItemsList?.length ?? 0),
+                              );
+                            } else {
+                              return Center(
+                                child: SpinKitSquareCircle(
+                                  color: Color(0xff2E5F3B),
+                                  size: 100.0,
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ),
                     ))
@@ -132,24 +256,105 @@ class _DashboardState extends State<Dashboard> {
     profileImageText =
         await databaseService.getImageText(context, _messangerKey);
 
+    itemsList = databaseService.retrieveArt();
+    retrievedItemsList = await databaseService.retrieveArt();
+
     setState(() {
       _loading = false;
     });
   }
 
-  List<String> imageList = [
-    'https://cdn.pixabay.com/photo/2019/03/15/09/49/girl-4056684_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/12/15/16/25/clock-5834193__340.jpg',
-    'https://cdn.pixabay.com/photo/2020/09/18/19/31/laptop-5582775_960_720.jpg',
-    'https://media.istockphoto.com/photos/woman-kayaking-in-fjord-in-norway-picture-id1059380230?b=1&k=6&m=1059380230&s=170667a&w=0&h=kA_A_XrhZJjw2bo5jIJ7089-VktFK0h0I4OWDqaac0c=',
-    'https://cdn.pixabay.com/photo/2019/11/05/00/53/cellular-4602489_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2017/02/12/10/29/christmas-2059698_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/01/29/17/09/snowboard-4803050_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/02/06/20/01/university-library-4825366_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/11/22/17/28/cat-5767334_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/12/13/16/22/snow-5828736_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/12/09/09/27/women-5816861_960_720.jpg',
-  ];
+  Future<void> getAllData() async {
+    setState(() {
+      _loading = true;
+    });
 
-  Future<void> getAllData() async {}
+    itemsList = databaseService.retrieveArt();
+    retrievedItemsList = await databaseService.retrieveArt();
+
+    setState(() {
+      _loading = false;
+    });
+  }
+}
+
+class CardArtItem extends StatelessWidget {
+  const CardArtItem(
+      {Key? key, required this.index, required this.retrievedArtItems})
+      : super(key: key);
+
+  final int index;
+  final List<ArtItems>? retrievedArtItems;
+  @override
+  Widget build(BuildContext context) {
+    String artPrice = '₦ 0.0';
+
+    artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
+        .format(retrievedArtItems?[index].artPrice);
+
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    topLeft: Radius.circular(15)),
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image: retrievedArtItems![index].imageUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 5.0,
+            ),
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                  color: Color(0xffEEF7F0),
+                  borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(15),
+                      bottomLeft: Radius.circular(15))),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
+                    child: Text(
+                      retrievedArtItems![index].artName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Color(0xff08110B),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17.0),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(13.0, 0, 10.0, 5.0),
+                    child: Align(
+                        alignment: Alignment.topRight,
+                        child: Text(artPrice,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17.0,
+                              color: Color(0xff08110B),
+                            ))),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
