@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:art_market/ArtItems.dart';
 import 'package:art_market/database_service.dart';
+import 'package:art_market/item_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -34,218 +35,213 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: _messangerKey,
-      theme: ThemeData().copyWith(
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme:
-            ThemeData().colorScheme.copyWith(primary: Color(0xff95C2A1)),
-      ),
-      home: Stack(
-        children: [
-          Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20.0, 0, 30.0, 0),
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 15.0,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        CircleAvatar(
-                          radius: 38.0,
-                          backgroundColor: Color(0xffC9E4D0),
-                          child: Text(
-                            profileImageText,
-                            style: const TextStyle(
-                                color: Color(0xff1B3823),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 23.0),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 30.0,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              allBtnColor = Color(0xff69B47D);
-                              sketchBtnColor = Colors.white;
-                              paintingBtnColor = Colors.white;
-                              retrievedItemsList = [];
-                              _loading = true;
-                            });
-
-                            retrievedItemsList =
-                                await databaseService.retrieveArt();
-
-                            setState(() {
-                              _loading = false;
-                            });
-                          },
-                          child: const Text('All',
-                              style: TextStyle(color: Color(0xff1B3823))),
-                          style: ElevatedButton.styleFrom(
-                              primary: allBtnColor,
-                              shape: const StadiumBorder(),
-                              side: BorderSide(
-                                  color: Color(0xff418653), width: 2)),
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              allBtnColor = Colors.white;
-                              sketchBtnColor = Color(0xff69B47D);
-                              paintingBtnColor = Colors.white;
-                              retrievedItemsList = [];
-                              _loading = true;
-                            });
-
-                            retrievedItemsList =
-                                await databaseService.retrieveArtBySketches();
-
-                            setState(() {
-                              _loading = false;
-                            });
-                          },
-                          child: const Text('Sketches',
-                              style: TextStyle(color: Color(0xff1B3823))),
-                          style: ElevatedButton.styleFrom(
-                              primary: sketchBtnColor,
-                              shape: const StadiumBorder(),
-                              side: BorderSide(
-                                  color: Color(0xff418653), width: 2)),
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              allBtnColor = Colors.white;
-                              sketchBtnColor = Colors.white;
-                              paintingBtnColor = Color(0xff69B47D);
-                              retrievedItemsList = [];
-                              _loading = true;
-                            });
-
-                            retrievedItemsList =
-                                await databaseService.retrieveArtByPaintings();
-
-                            setState(() {
-                              _loading = false;
-                            });
-                          },
-                          child: const Text(
-                            'Paintings',
-                            style: TextStyle(color: Color(0xff1B3823)),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                              primary: paintingBtnColor,
-                              shape: const StadiumBorder(),
-                              side: BorderSide(
-                                  color: Color(0xff418653), width: 2)),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 25.0,
-                    ),
-                    Expanded(
-                        child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10)),
-                      child: RefreshIndicator(
-                        onRefresh: () {
-                          return getAllData();
-                        },
-                        child: FutureBuilder(
-                          future: itemsList,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<List<ArtItems>> snapshot) {
-                            if (snapshot.connectionState ==
-                                    ConnectionState.done &&
-                                retrievedItemsList?.isEmpty == null) {
-                              const Center(
-                                child: Text(
-                                  'No Art Yet',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 20.0),
-                                ),
-                              );
-                            }
-
-                            if (retrievedItemsList?.isEmpty ?? true) {
-                              return const Center(
-                                child: Text(
-                                  'No Art Yet',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 20.0),
-                                ),
-                              );
-                            }
-
-                            if (snapshot.hasData && snapshot.data != null) {
-                              return GridView.custom(
-                                shrinkWrap: true,
-                                gridDelegate: SliverWovenGridDelegate.count(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 4,
-                                  crossAxisSpacing: 4,
-                                  pattern: [
-                                    const WovenGridTile(1),
-                                    const WovenGridTile(
-                                      5 / 7,
-                                      crossAxisRatio: 0.9,
-                                      alignment: AlignmentDirectional.centerEnd,
-                                    ),
-                                  ],
-                                ),
-                                childrenDelegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                  return CardArtItem(
-                                      index: index,
-                                      retrievedArtItems: retrievedItemsList);
-                                }, childCount: retrievedItemsList?.length ?? 0),
-                              );
-                            } else {
-                              return Center(
-                                child: SpinKitSquareCircle(
-                                  color: Color(0xff2E5F3B),
-                                  size: 100.0,
-                                ),
-                              );
-                            }
-                          },
+    return Stack(
+      children: [
+        Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.0, 0, 30.0, 0),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 15.0,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      CircleAvatar(
+                        radius: 38.0,
+                        backgroundColor: Color(0xffC9E4D0),
+                        child: Text(
+                          profileImageText,
+                          style: const TextStyle(
+                              color: Color(0xff1B3823),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 23.0),
                         ),
                       ),
-                    ))
-                  ],
-                ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          setState(() {
+                            allBtnColor = Color(0xff69B47D);
+                            sketchBtnColor = Colors.white;
+                            paintingBtnColor = Colors.white;
+                            retrievedItemsList = [];
+                            _loading = true;
+                          });
+
+                          retrievedItemsList =
+                              await databaseService.retrieveArt();
+
+                          setState(() {
+                            _loading = false;
+                          });
+                        },
+                        child: const Text('All',
+                            style: TextStyle(color: Color(0xff1B3823))),
+                        style: ElevatedButton.styleFrom(
+                            primary: allBtnColor,
+                            shape: const StadiumBorder(),
+                            side:
+                                BorderSide(color: Color(0xff418653), width: 2)),
+                      ),
+                      SizedBox(
+                        width: 20.0,
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          setState(() {
+                            allBtnColor = Colors.white;
+                            sketchBtnColor = Color(0xff69B47D);
+                            paintingBtnColor = Colors.white;
+                            retrievedItemsList = [];
+                            _loading = true;
+                          });
+
+                          retrievedItemsList =
+                              await databaseService.retrieveArtBySketches();
+
+                          setState(() {
+                            _loading = false;
+                          });
+                        },
+                        child: const Text('Sketches',
+                            style: TextStyle(color: Color(0xff1B3823))),
+                        style: ElevatedButton.styleFrom(
+                            primary: sketchBtnColor,
+                            shape: const StadiumBorder(),
+                            side:
+                                BorderSide(color: Color(0xff418653), width: 2)),
+                      ),
+                      SizedBox(
+                        width: 20.0,
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          setState(() {
+                            allBtnColor = Colors.white;
+                            sketchBtnColor = Colors.white;
+                            paintingBtnColor = Color(0xff69B47D);
+                            retrievedItemsList = [];
+                            _loading = true;
+                          });
+
+                          retrievedItemsList =
+                              await databaseService.retrieveArtByPaintings();
+
+                          setState(() {
+                            _loading = false;
+                          });
+                        },
+                        child: const Text(
+                          'Paintings',
+                          style: TextStyle(color: Color(0xff1B3823)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                            primary: paintingBtnColor,
+                            shape: const StadiumBorder(),
+                            side:
+                                BorderSide(color: Color(0xff418653), width: 2)),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Expanded(
+                      child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        topLeft: Radius.circular(10)),
+                    child: RefreshIndicator(
+                      onRefresh: () {
+                        return getAllData();
+                      },
+                      child: FutureBuilder(
+                        future: itemsList,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<List<ArtItems>> snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              retrievedItemsList?.isEmpty == null) {
+                            const Center(
+                              child: Text(
+                                'No Art Yet',
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 20.0),
+                              ),
+                            );
+                          }
+
+                          if (retrievedItemsList?.isEmpty ?? true) {
+                            return const Center(
+                              child: Text(
+                                'No Art Yet',
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 20.0),
+                              ),
+                            );
+                          }
+
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return GridView.custom(
+                              shrinkWrap: true,
+                              gridDelegate: SliverWovenGridDelegate.count(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 4,
+                                crossAxisSpacing: 4,
+                                pattern: [
+                                  const WovenGridTile(1),
+                                  const WovenGridTile(
+                                    5 / 7,
+                                    crossAxisRatio: 0.9,
+                                    alignment: AlignmentDirectional.centerEnd,
+                                  ),
+                                ],
+                              ),
+                              childrenDelegate:
+                                  SliverChildBuilderDelegate((context, index) {
+                                return CardArtItem(
+                                    index: index,
+                                    retrievedArtItems: retrievedItemsList);
+                              }, childCount: retrievedItemsList?.length ?? 0),
+                            );
+                          } else {
+                            return Center(
+                              child: SpinKitSquareCircle(
+                                color: Color(0xff2E5F3B),
+                                size: 100.0,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  )),
+                  SizedBox(
+                    height: 10.0,
+                  )
+                ],
               ),
             ),
           ),
-          if (_loading)
-            const Center(
-              child: SpinKitSquareCircle(
-                color: Color(0xff2E5F3B),
-                size: 100.0,
-              ),
-            )
-        ],
-      ),
+        ),
+        if (_loading)
+          const Center(
+            child: SpinKitSquareCircle(
+              color: Color(0xff2E5F3B),
+              size: 100.0,
+            ),
+          )
+      ],
     );
   }
 
@@ -293,7 +289,10 @@ class CardArtItem extends StatelessWidget {
         .format(retrievedArtItems?[index].artPrice);
 
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const ItemDetails()));
+      },
       child: Container(
         decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(15))),
