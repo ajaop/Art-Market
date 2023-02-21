@@ -290,8 +290,12 @@ class CardArtItem extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => const ItemDetails()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  ItemDetails(retrievedArtItem: retrievedArtItems![index]),
+            ));
       },
       child: Container(
         decoration: const BoxDecoration(

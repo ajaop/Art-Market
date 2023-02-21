@@ -95,7 +95,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: ((context) =>
-                                              const SignIn())));
+                                              const SignUp())));
                                 },
                                 child: const Text('Get Started')),
                           ],
