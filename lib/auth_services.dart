@@ -106,17 +106,15 @@ class AuthService {
     final User? user = auth.currentUser;
     if (user!.uid.isNotEmpty) {
       try {
-        CollectionReference users =
-            FirebaseFirestore.instance.collection('users');
+        DocumentReference<Map<String, dynamic>> users =
+            FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-        await users.add({
+        await users.set({
           "firstname": firstname,
           "lastname": lastname,
           "email": email,
           "userId": user.uid,
-          "amount": 0,
-          "amountReset": 0,
-          "lastResetTime": DateTime.now()
+          "accountCreationDate": DateTime.now()
         });
         return true;
       } catch (e) {
@@ -134,6 +132,7 @@ class AuthService {
         .limit(1)
         .get();
 
+    values.exists;
     if (values.size >= 1) {
       return true;
     } else {

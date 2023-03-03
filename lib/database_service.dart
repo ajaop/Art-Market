@@ -60,6 +60,59 @@ class DatabaseService {
         .toList();
   }
 
+  Future addItemToLIked(itemId, itemName, _messangerKey) async {
+    final User? user = auth.currentUser;
+    if (user!.uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('LikedArt')
+            .doc(itemId)
+            .set({
+          'ArtId': itemId,
+          'ArtName': itemName,
+          'DateAdded': DateTime.now()
+        });
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+      }
+    }
+  }
+
+  Future removeItemFromLIked(itemId, _messangerKey) async {
+    final User? user = auth.currentUser;
+
+    if (user!.uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('LikedArt')
+            .doc(itemId)
+            .delete();
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+      }
+    }
+  }
+
+  Future<bool> checkIfItemIsLIked(String itemId) async {
+    final dynamic values = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('LikedArt')
+        .doc(itemId)
+        .get();
+
+    /* if (values?.size ?? 0 >= 1) {
+      return true;
+    } else {
+      return false;
+    }*/
+    return values.exists;
+  }
+
   void displayError(errorMessage, _messangerKey) {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,

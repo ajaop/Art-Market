@@ -6,12 +6,14 @@ class ArtItems {
   final String imageUrl;
   final String artName;
   final int artPrice;
+  final String docId;
 
   ArtItems(
       {required this.artType,
       required this.imageUrl,
       required this.artName,
-      required this.artPrice});
+      required this.artPrice,
+      required this.docId});
 
   Map<String, dynamic> toMap() {
     return {
@@ -26,5 +28,6 @@ class ArtItems {
       : artType = doc.data()!["ArtType"],
         imageUrl = doc.data()!["ImageUrl"],
         artName = doc.data()!["Name"],
-        artPrice = doc.data()!["Price"];
+        artPrice = doc.data()!["Price"],
+        docId = doc.id;
 }
