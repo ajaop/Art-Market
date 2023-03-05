@@ -60,6 +60,20 @@ class DatabaseService {
         .toList();
   }
 
+  /*Future<List<ArtItems>> retrieveFavouriteArt() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _db.
+        collection('users')
+            .doc(user!.uid)
+            .collection('LikedArt')
+            .get();
+
+    return snapshot.docs
+        .map((docSnapshot) => ArtItems.fromDocumentSnapshot(docSnapshot))
+        .toList();
+  }
+  */
+
   Future addItemToLIked(itemId, itemName, _messangerKey) async {
     final User? user = auth.currentUser;
     if (user!.uid.isNotEmpty) {
