@@ -39,7 +39,7 @@ class _FavouritesState extends State<Favourites> {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 0),
+              padding: const EdgeInsets.fromLTRB(15.0, 30.0, 15.0, 0),
               child: Column(
                 children: [
                   Container(
@@ -116,7 +116,7 @@ class _FavouritesState extends State<Favourites> {
                           return ListView.separated(
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,
-                              itemCount: 7,
+                              itemCount: retrievedItemsList?.length ?? 0,
                               itemBuilder: (context, position) {
                                 return FavouriteItems(
                                     position: position,
@@ -157,9 +157,8 @@ class _FavouritesState extends State<Favourites> {
       _loading = true;
     });
 
-    databaseService.retrieveFavouriteArt();
-    itemsList = databaseService.retrieveArt();
-    retrievedItemsList = await databaseService.retrieveArt();
+    itemsList = databaseService.retrieveFavouriteArt();
+    retrievedItemsList = await databaseService.retrieveFavouriteArt();
 
     setState(() {
       _loading = false;
@@ -167,27 +166,40 @@ class _FavouritesState extends State<Favourites> {
   }
 }
 
-class FavouriteItems extends StatelessWidget {
+class FavouriteItems extends StatefulWidget {
   const FavouriteItems(
       {Key? key, required this.position, required this.retrievedArtItems})
       : super(key: key);
 
   final int position;
   final List<ArtItems>? retrievedArtItems;
+
+  @override
+  State<FavouriteItems> createState() => _FavouriteItemsState();
+}
+
+class _FavouriteItemsState extends State<FavouriteItems> {
   @override
   Widget build(BuildContext context) {
     String artPrice = '₦ 0.0';
+    _FavouritesState _favouritesState = _FavouritesState();
 
     artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
-        .format(retrievedArtItems?[position].artPrice);
+        .format(widget.retrievedArtItems?[widget.position].artPrice);
     return InkWell(
       onTap: () {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  ItemDetails(retrievedArtItem: retrievedArtItems![position]),
-            ));
+              builder: (context) => ItemDetails(
+                  retrievedArtItem: widget.retrievedArtItems![widget.position]),
+            )).then((value) {
+          setState(() {
+            _favouritesState.itemsList =
+                _favouritesState.databaseService.retrieveFavouriteArt();
+            print('doe');
+          });
+        });
       },
       child: Container(
         decoration: const BoxDecoration(
@@ -206,23 +218,23 @@ class FavouriteItems extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                 child: FadeInImage.memoryNetwork(
                   placeholder: kTransparentImage,
-                  image: retrievedArtItems![position].imageUrl,
+                  image: widget.retrievedArtItems![widget.position].imageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 50.0,
             ),
             Flexible(
               child: Column(
                 children: [
                   Text(
-                    retrievedArtItems![position].artName,
+                    widget.retrievedArtItems![widget.position].artName,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 20.0),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 7.0,
                   ),
                   Text(

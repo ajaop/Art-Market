@@ -60,19 +60,44 @@ class DatabaseService {
         .toList();
   }
 
-  /*Future<List<ArtItems>> retrieveFavouriteArt() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await _db.
-        collection('users')
-            .doc(user!.uid)
-            .collection('LikedArt')
-            .get();
+  Future<List<ArtItems>> retrieveFavouriteArt() async {
+    List<ArtItems> favouriteItems = [];
+    /* await _db
+        .collection('users')
+        .doc(user!.uid)
+        .collection('LikedArt')
+        .get()
+        .then((value) => value.docs.forEach((doc) async {
+              final artId = doc.data()['ArtId'];
+              DocumentSnapshot<Map<String, dynamic>> snapshot =
+                  await _db.collection("arts").doc(artId).get();
 
-    return snapshot.docs
-        .map((docSnapshot) => ArtItems.fromDocumentSnapshot(docSnapshot))
-        .toList();
+              favouriteItems.add(ArtItems.fromDocumentSnapshot(snapshot));
+            }
+            ));
+            */
+
+    await _db
+        .collection('users')
+        .doc(user!.uid)
+        .collection('LikedArt')
+        .get()
+        .then(
+      (value) async {
+        for (var docSnapshot in value.docs) {
+          final artId = docSnapshot.data()['ArtId'];
+
+          DocumentSnapshot<Map<String, dynamic>> snapshot =
+              await _db.collection("arts").doc(artId).get();
+
+          favouriteItems.add(ArtItems.fromDocumentSnapshot(snapshot));
+        }
+        return favouriteItems;
+      },
+    );
+
+    return favouriteItems;
   }
-  */
 
   Future addItemToLIked(itemId, itemName, _messangerKey) async {
     final User? user = auth.currentUser;
@@ -119,11 +144,6 @@ class DatabaseService {
         .doc(itemId)
         .get();
 
-    /* if (values?.size ?? 0 >= 1) {
-      return true;
-    } else {
-      return false;
-    }*/
     return values.exists;
   }
 
