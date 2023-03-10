@@ -5,7 +5,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:like_button/like_button.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:intl/intl.dart';
-
 import 'database_service.dart';
 
 class ItemDetails extends StatefulWidget {
@@ -185,8 +184,18 @@ class _ItemDetailsState extends State<ItemDetails> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           )),
-                      onPressed: () {
-                        print("Button CLicked");
+                      onPressed: () async {
+                        setState(() {
+                          _loading = true;
+                        });
+                        await databaseService.addItemToCart(
+                            widget.retrievedArtItem.docId,
+                            widget.retrievedArtItem.artName,
+                            _messangerKey);
+
+                        setState(() {
+                          _loading = false;
+                        });
                       },
                       child: const Text('Add To Cart')),
                 ),

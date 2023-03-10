@@ -62,20 +62,6 @@ class DatabaseService {
 
   Future<List<ArtItems>> retrieveFavouriteArt() async {
     List<ArtItems> favouriteItems = [];
-    /* await _db
-        .collection('users')
-        .doc(user!.uid)
-        .collection('LikedArt')
-        .get()
-        .then((value) => value.docs.forEach((doc) async {
-              final artId = doc.data()['ArtId'];
-              DocumentSnapshot<Map<String, dynamic>> snapshot =
-                  await _db.collection("arts").doc(artId).get();
-
-              favouriteItems.add(ArtItems.fromDocumentSnapshot(snapshot));
-            }
-            ));
-            */
 
     await _db
         .collection('users')
@@ -128,6 +114,63 @@ class DatabaseService {
             .collection('users')
             .doc(user.uid)
             .collection('LikedArt')
+            .doc(itemId)
+            .delete();
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+      }
+    }
+  }
+
+  Future<List<ArtItems>> retrieveCart() async {
+    List<ArtItems> cartItems = [];
+
+    await _db.collection('users').doc(user!.uid).collection('Cart').get().then(
+      (value) async {
+        for (var docSnapshot in value.docs) {
+          final artId = docSnapshot.data()['ArtId'];
+
+          DocumentSnapshot<Map<String, dynamic>> snapshot =
+              await _db.collection("arts").doc(artId).get();
+
+          cartItems.add(ArtItems.fromDocumentSnapshot(snapshot));
+        }
+        return cartItems;
+      },
+    );
+
+    return cartItems;
+  }
+
+  Future addItemToCart(itemId, itemName, _messangerKey) async {
+    final User? user = auth.currentUser;
+    if (user!.uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Cart')
+            .doc(itemId)
+            .set({
+          'ArtId': itemId,
+          'ArtName': itemName,
+          'DateAdded': DateTime.now()
+        });
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+      }
+    }
+  }
+
+  Future removeItemFromCart(itemId, _messangerKey) async {
+    final User? user = auth.currentUser;
+
+    if (user!.uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Cart')
             .doc(itemId)
             .delete();
       } catch (e) {

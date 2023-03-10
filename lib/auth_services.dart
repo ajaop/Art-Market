@@ -153,6 +153,16 @@ class AuthService {
     }
   }
 
+  bool checkIfLoggedIn2(context) {
+    final User? user = auth.currentUser;
+
+    if (user?.uid.isEmpty == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   void error(errorMessage, _messangerKey) {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,

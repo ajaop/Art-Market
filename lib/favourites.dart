@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'ArtItems.dart';
@@ -10,14 +11,15 @@ class Favourites extends StatefulWidget {
   const Favourites({Key? key}) : super(key: key);
 
   @override
-  State<Favourites> createState() => _FavouritesState();
+  State<Favourites> createState() => FavouritesState();
 }
 
-class _FavouritesState extends State<Favourites> {
+class FavouritesState extends State<Favourites> {
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
   Future<List<ArtItems>>? itemsList;
   List<ArtItems>? retrievedItemsList;
   DatabaseService databaseService = DatabaseService();
+  final _searchTextController = TextEditingController();
   bool _loading = false;
 
   @override
@@ -56,14 +58,19 @@ class _FavouritesState extends State<Favourites> {
                             child: Align(
                               alignment: Alignment.center,
                               child: TextFormField(
+                                  controller: _searchTextController,
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(20),
+                                  ],
+                                  onChanged: (value) => filterFavourites(value),
                                   decoration: const InputDecoration(
-                                hintText: 'BUJU BNXN',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w400),
-                              )),
+                                    hintText: 'BUJU BNXN',
+                                    border: InputBorder.none,
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w400),
+                                  )),
                             ),
                           ),
                         ),
@@ -87,53 +94,61 @@ class _FavouritesState extends State<Favourites> {
                     height: 20.0,
                   ),
                   Expanded(
-                    child: FutureBuilder(
-                      future: itemsList,
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<ArtItems>> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            retrievedItemsList?.isEmpty == null) {
-                          const Center(
-                            child: Text(
-                              'No Favourites Yet',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 20.0),
-                            ),
-                          );
-                        }
-
-                        if (retrievedItemsList?.isEmpty ?? true) {
-                          return const Center(
-                            child: Text(
-                              'No Favourites Yet',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 20.0),
-                            ),
-                          );
-                        }
-
-                        if (snapshot.hasData && snapshot.data != null) {
-                          return ListView.separated(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount: retrievedItemsList?.length ?? 0,
-                              itemBuilder: (context, position) {
-                                return FavouriteItems(
-                                    position: position,
-                                    retrievedArtItems: retrievedItemsList);
-                              },
-                              separatorBuilder: (context, index) => SizedBox(
-                                    height: 12.0,
-                                  ));
-                        } else {
-                          return Center(
-                            child: SpinKitSquareCircle(
-                              color: Color(0xff2E5F3B),
-                              size: 100.0,
-                            ),
-                          );
-                        }
+                    child: RefreshIndicator(
+                      onRefresh: () {
+                        return getDefaultValues();
                       },
+                      child: FutureBuilder(
+                        future: itemsList,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<List<ArtItems>> snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              retrievedItemsList?.isEmpty == null) {
+                            const Center(
+                              child: Text(
+                                'No Favourites Yet',
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 20.0),
+                              ),
+                            );
+                          }
+
+                          if (retrievedItemsList?.isEmpty ?? true) {
+                            return const Center(
+                              child: Text(
+                                'No Favourites Yet',
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 20.0),
+                              ),
+                            );
+                          }
+
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return ListView.separated(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: retrievedItemsList?.length ?? 0,
+                                itemBuilder: (context, position) {
+                                  return FavouriteItems(
+                                    position: position,
+                                    retrievedArtItems: retrievedItemsList,
+                                    getValues: getDefaultValues,
+                                  );
+                                },
+                                separatorBuilder: (context, index) => SizedBox(
+                                      height: 12.0,
+                                    ));
+                          } else {
+                            return Center(
+                              child: SpinKitSquareCircle(
+                                color: Color(0xff2E5F3B),
+                                size: 100.0,
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   )
                 ],
@@ -164,41 +179,54 @@ class _FavouritesState extends State<Favourites> {
       _loading = false;
     });
   }
+
+  Future<void> filterFavourites(String enteredKeyword) async {
+    retrievedItemsList = await databaseService.retrieveFavouriteArt();
+
+    List<ArtItems> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = await databaseService.retrieveFavouriteArt();
+    } else {
+      results = retrievedItemsList!
+          .where((item) =>
+              item.artName.toLowerCase().contains(enteredKeyword.toLowerCase()))
+          .toList();
+    }
+
+    // Refresh the UI
+    setState(() {
+      retrievedItemsList = results;
+    });
+  }
 }
 
-class FavouriteItems extends StatefulWidget {
+class FavouriteItems extends StatelessWidget {
   const FavouriteItems(
-      {Key? key, required this.position, required this.retrievedArtItems})
+      {Key? key,
+      required this.position,
+      required this.retrievedArtItems,
+      this.getValues})
       : super(key: key);
 
   final int position;
   final List<ArtItems>? retrievedArtItems;
+  final getValues;
 
-  @override
-  State<FavouriteItems> createState() => _FavouriteItemsState();
-}
-
-class _FavouriteItemsState extends State<FavouriteItems> {
   @override
   Widget build(BuildContext context) {
     String artPrice = '₦ 0.0';
-    _FavouritesState _favouritesState = _FavouritesState();
 
     artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
-        .format(widget.retrievedArtItems?[widget.position].artPrice);
+        .format(retrievedArtItems?[position].artPrice);
     return InkWell(
       onTap: () {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ItemDetails(
-                  retrievedArtItem: widget.retrievedArtItems![widget.position]),
+              builder: (context) =>
+                  ItemDetails(retrievedArtItem: retrievedArtItems![position]),
             )).then((value) {
-          setState(() {
-            _favouritesState.itemsList =
-                _favouritesState.databaseService.retrieveFavouriteArt();
-            print('doe');
-          });
+          getValues();
         });
       },
       child: Container(
@@ -218,7 +246,7 @@ class _FavouriteItemsState extends State<FavouriteItems> {
                 borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                 child: FadeInImage.memoryNetwork(
                   placeholder: kTransparentImage,
-                  image: widget.retrievedArtItems![widget.position].imageUrl,
+                  image: retrievedArtItems![position].imageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -230,7 +258,7 @@ class _FavouriteItemsState extends State<FavouriteItems> {
               child: Column(
                 children: [
                   Text(
-                    widget.retrievedArtItems![widget.position].artName,
+                    retrievedArtItems![position].artName,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 20.0),
                   ),
