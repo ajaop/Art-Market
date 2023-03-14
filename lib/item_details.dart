@@ -8,10 +8,12 @@ import 'package:intl/intl.dart';
 import 'database_service.dart';
 
 class ItemDetails extends StatefulWidget {
-  const ItemDetails({Key? key, required this.retrievedArtItem})
+  const ItemDetails(
+      {Key? key, required this.retrievedArtItem, required this.isLiked})
       : super(key: key);
 
   final ArtItems retrievedArtItem;
+  final bool isLiked;
 
   @override
   State<ItemDetails> createState() => _ItemDetailsState();
@@ -19,9 +21,10 @@ class ItemDetails extends StatefulWidget {
 
 class _ItemDetailsState extends State<ItemDetails> {
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
-  bool _loading = false, isLiked = false;
+  bool _loading = false;
   DatabaseService databaseService = DatabaseService();
   FirebaseAuth auth = FirebaseAuth.instance;
+  String buttonText = 'Add To Cart';
 
   @override
   void initState() {
@@ -103,7 +106,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                                       radius: 23.0,
                                       backgroundColor: Colors.grey[300],
                                       child: LikeButton(
-                                        isLiked: isLiked,
+                                        isLiked: widget.isLiked,
                                         onTap: onLikeButtonTapped,
                                         size: 25.0,
                                         circleColor: const CircleColor(
@@ -184,24 +187,23 @@ class _ItemDetailsState extends State<ItemDetails> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           )),
-                      onPressed: () async {
-                        setState(() {
-                          _loading = true;
-                        });
-                        await databaseService.addItemToCart(
-                            widget.retrievedArtItem.docId,
-                            widget.retrievedArtItem.artName,
-                            _messangerKey);
+                      onPressed: _loading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _loading = true;
+                              });
+                              addItemToCart();
 
-                        setState(() {
-                          _loading = false;
-                        });
-                      },
-                      child: const Text('Add To Cart')),
+                              setState(() {
+                                _loading = false;
+                              });
+                            },
+                      child: Text(buttonText)),
                 ),
               ],
             ),
-            if (_loading)
+            if (_loading && buttonText.contains('Add To Cart'))
               const Center(
                 child: SpinKitSquareCircle(
                   color: Color(0xff2E5F3B),
@@ -226,12 +228,49 @@ class _ItemDetailsState extends State<ItemDetails> {
     return !isLiked;
   }
 
+  Future<void> addItemToCart() async {
+    await databaseService.addItemToCart(widget.retrievedArtItem.docId,
+        widget.retrievedArtItem.artName, _messangerKey);
+
+    bool isInCart = await databaseService
+        .checkIfItemIsInCart(widget.retrievedArtItem.docId);
+
+    if (isInCart == true) {
+      setState(() {
+        buttonText = 'Already Added To Cart';
+        _loading = isInCart;
+      });
+    } else {
+      setState(() {
+        buttonText = 'Add To Cart';
+        _loading = isInCart;
+      });
+    }
+  }
+
   void retrieveDefaultValues() async {
-    bool isFavourite =
+    /*  bool isFavourite =
         await databaseService.checkIfItemIsLIked(widget.retrievedArtItem.docId);
+
+    bool isInCart = await databaseService
+        .checkIfItemIsInCart(widget.retrievedArtItem.docId);
+
+    if (isInCart = true) {
+      setState(() {
+        buttonText = 'Already Added To Cart';
+      });
+    } else {
+      print('here');
+      setState(() {
+        buttonText = 'Add To Cart';
+      });
+    }
+    
 
     setState(() {
       isLiked = isFavourite;
+      _loading = isInCart;
     });
+    */
   }
 }
