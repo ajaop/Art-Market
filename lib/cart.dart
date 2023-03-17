@@ -1,3 +1,4 @@
+import 'package:art_market/favourites.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -5,6 +6,7 @@ import 'ArtItems.dart';
 import 'database_service.dart';
 import 'item_details.dart';
 import 'package:intl/intl.dart';
+import 'package:collection/collection.dart';
 
 class Cart extends StatefulWidget {
   const Cart({Key? key}) : super(key: key);
@@ -19,7 +21,7 @@ class _CartState extends State<Cart> {
   List<ArtItems>? retrievedItemsList;
   DatabaseService databaseService = DatabaseService();
   bool _loading = false;
-  int quantity = 1;
+  String subTotalText = "₦ 0.0", vatText = "₦ 0.0", totalText = "₦ 0.0";
 
   @override
   void initState() {
@@ -40,12 +42,9 @@ class _CartState extends State<Cart> {
           child: Stack(
             children: [
               Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 30.0, 15.0, 0),
-                  child: Column(children: [
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Align(
+                  padding: const EdgeInsets.fromLTRB(20.0, 15.0, 15.0, 0),
+                  child: ListView(children: [
+                    const Align(
                       alignment: Alignment.topLeft,
                       child: Text(
                         'Cart',
@@ -54,9 +53,10 @@ class _CartState extends State<Cart> {
                       ),
                     ),
                     SizedBox(
-                      height: 40.0,
+                      height: 20.0,
                     ),
-                    Expanded(
+                    Container(
+                      height: 450.0,
                       child: RefreshIndicator(
                         onRefresh: () {
                           return getDefaultValues();
@@ -95,10 +95,10 @@ class _CartState extends State<Cart> {
                                   itemBuilder: (context, position) {
                                     return CartItems(
                                         position: position,
-                                        quantityValue: quantity,
                                         retrievedArtItems: retrievedItemsList,
-                                        qtyOperations: QtyOperations,
-                                        deleteItem: deleteItem);
+                                        deleteItem: deleteItem,
+                                        getValues: getDefaultValues,
+                                        messangerKey: _messangerKey);
                                   },
                                   separatorBuilder: (context, index) =>
                                       SizedBox(
@@ -115,7 +115,82 @@ class _CartState extends State<Cart> {
                           },
                         ),
                       ),
-                    )
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    const Divider(
+                      height: 5.0,
+                      thickness: 1.6,
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Sub Total',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 18.0)),
+                        Text(subTotalText,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w400, fontSize: 17.0))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('7.5% VAT',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 18.0)),
+                        Text(
+                          vatText,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 17.0),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    const Divider(
+                      height: 5.0,
+                      thickness: 1.6,
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Total',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 20.0)),
+                        Text(totalText,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 18.0))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            primary: Color(0xff2E5F3B),
+                            minimumSize: const Size.fromHeight(65),
+                            textStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: 'OpenSans',
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            )),
+                        onPressed: _loading ? null : () {},
+                        child: Text('CHECKOUT'))
                   ])),
               if (_loading)
                 const Center(
@@ -139,6 +214,19 @@ class _CartState extends State<Cart> {
     itemsList = databaseService.retrieveCart();
     retrievedItemsList = await databaseService.retrieveCart();
 
+    if (retrievedItemsList?.isNotEmpty ?? true) {
+      int subTotal = await sumAllItems();
+      double vat = (subTotal * 0.075), total = subTotal + vat;
+      setState(() {
+        subTotalText = NumberFormat.currency(locale: "en_NG", symbol: "₦")
+            .format(subTotal);
+        vatText =
+            NumberFormat.currency(locale: "en_NG", symbol: "₦").format(vat);
+        totalText =
+            NumberFormat.currency(locale: "en_NG", symbol: "₦").format(total);
+      });
+    }
+
     setState(() {
       _loading = false;
     });
@@ -150,14 +238,186 @@ class _CartState extends State<Cart> {
     });
 
     await databaseService.removeItemFromCart(itemId, _messangerKey);
-    getDefaultValues();
+    await getDefaultValues();
 
     setState(() {
       _loading = false;
     });
   }
 
-  void QtyOperations(bool isIncrease) {
+  Future<int> sumAllItems() async {
+    List<int> price = [];
+    int totalAmount = 0;
+    for (int i = 0; i < retrievedItemsList!.length; i++) {
+      price.add(
+          retrievedItemsList![i].artPrice * retrievedItemsList![i].quantity);
+    }
+    totalAmount = price.sum;
+    print(price);
+    return totalAmount;
+  }
+}
+
+class CartItems extends StatefulWidget {
+  const CartItems(
+      {Key? key,
+      required this.position,
+      required this.retrievedArtItems,
+      this.deleteItem,
+      this.getValues,
+      this.messangerKey})
+      : super(key: key);
+
+  final int position;
+  final List<ArtItems>? retrievedArtItems;
+  final deleteItem, getValues, messangerKey;
+
+  @override
+  State<CartItems> createState() => _CartItemsState();
+}
+
+class _CartItemsState extends State<CartItems> {
+  DatabaseService databaseService = DatabaseService();
+  int quantity = 0;
+  bool minusDisable = true;
+
+  @override
+  void initState() {
+    super.initState();
+    quantity = widget.retrievedArtItems![widget.position].quantity;
+    if (quantity > 1) {
+      minusDisable = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String artPrice = '₦ 0.0';
+
+    artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
+        .format(widget.retrievedArtItems?[widget.position].artPrice);
+
+    return Container(
+      decoration: const BoxDecoration(
+          color: Color(0xffEEF7F0),
+          borderRadius: BorderRadius.all(Radius.circular(15))),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10.0, 0, 10.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              height: 100.0,
+              width: 120.0,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image: widget.retrievedArtItems![widget.position].imageUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 30.0,
+            ),
+            Flexible(
+              child: Column(
+                children: [
+                  Text(
+                    widget.retrievedArtItems![widget.position].artName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20.0),
+                  ),
+                  const SizedBox(
+                    height: 7.0,
+                  ),
+                  Text(
+                    artPrice,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 17.0),
+                  ),
+                  SizedBox(
+                    height: 20.0,
+                  ),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          QtyOperations(true);
+                        },
+                        child: const CircleAvatar(
+                            backgroundColor: Color(0xff7BBE8C),
+                            child: Text(
+                              '+',
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 20.0),
+                            )),
+                      ),
+                      SizedBox(
+                        width: 15.0,
+                      ),
+                      Text(
+                        quantity.toString(),
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 15.0,
+                      ),
+                      InkWell(
+                        onTap: minusDisable
+                            ? null
+                            : () {
+                                QtyOperations(false);
+                              },
+                        child: const CircleAvatar(
+                            backgroundColor: Color(0xff7BBE8C),
+                            child: Text(
+                              '-',
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 20.0),
+                            )),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 30.0,
+            ),
+            InkWell(
+              onTap: () {
+                widget.deleteItem(
+                    widget.retrievedArtItems![widget.position].docId);
+              },
+              child: Container(
+                height: 100.0,
+                width: 50.0,
+                child: CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Colors.black,
+                      size: 27.0,
+                    )),
+              ),
+            ),
+            SizedBox(
+              width: 10.0,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> QtyOperations(bool isIncrease) async {
     if (isIncrease) {
       if (quantity >= 1) {
         setState(() {
@@ -171,143 +431,22 @@ class _CartState extends State<Cart> {
         });
       }
     }
-  }
-}
 
-class CartItems extends StatelessWidget {
-  const CartItems(
-      {Key? key,
-      required this.position,
-      required this.quantityValue,
-      required this.retrievedArtItems,
-      this.qtyOperations,
-      this.deleteItem})
-      : super(key: key);
+    await databaseService.editQuantityInCart(
+        widget.retrievedArtItems![widget.position].docId,
+        quantity,
+        widget.messangerKey);
 
-  final int position, quantityValue;
-  final List<ArtItems>? retrievedArtItems;
-  final qtyOperations, deleteItem;
+    widget.getValues();
 
-  @override
-  Widget build(BuildContext context) {
-    String artPrice = '₦ 0.0';
-
-    artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
-        .format(retrievedArtItems?[position].artPrice);
-
-    DatabaseService databaseService = DatabaseService();
-
-    return Container(
-      decoration: const BoxDecoration(
-          //color: Color(0xffEEF7F0),
-          borderRadius: BorderRadius.all(Radius.circular(15))),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: 100.0,
-            width: 120.0,
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-              child: FadeInImage.memoryNetwork(
-                placeholder: kTransparentImage,
-                image: retrievedArtItems![position].imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 30.0,
-          ),
-          Flexible(
-            child: Column(
-              children: [
-                Text(
-                  retrievedArtItems![position].artName,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20.0),
-                ),
-                const SizedBox(
-                  height: 7.0,
-                ),
-                Text(
-                  artPrice,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 17.0),
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        qtyOperations(true);
-                      },
-                      child: const CircleAvatar(
-                          backgroundColor: Color(0xffEEF7F0),
-                          child: Text(
-                            '+',
-                            style:
-                                TextStyle(color: Colors.black, fontSize: 20.0),
-                          )),
-                    ),
-                    SizedBox(
-                      width: 15.0,
-                    ),
-                    Text(
-                      quantityValue.toString(),
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 15.0,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        qtyOperations(false);
-                      },
-                      child: const CircleAvatar(
-                          backgroundColor: Color(0xffEEF7F0),
-                          child: Text(
-                            '-',
-                            style:
-                                TextStyle(color: Colors.black, fontSize: 20.0),
-                          )),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-          SizedBox(
-            width: 30.0,
-          ),
-          InkWell(
-            onTap: () {
-              deleteItem(retrievedArtItems![position].docId);
-            },
-            child: Container(
-              height: 100.0,
-              width: 50.0,
-              child: CircleAvatar(
-                  backgroundColor: Colors.grey[300],
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: Colors.black,
-                    size: 27.0,
-                  )),
-            ),
-          ),
-          SizedBox(
-            width: 10.0,
-          )
-        ],
-      ),
-    );
+    if (quantity <= 1) {
+      setState(() {
+        minusDisable = true;
+      });
+    } else {
+      setState(() {
+        minusDisable = false;
+      });
+    }
   }
 }

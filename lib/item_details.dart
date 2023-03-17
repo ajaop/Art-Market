@@ -9,11 +9,14 @@ import 'database_service.dart';
 
 class ItemDetails extends StatefulWidget {
   const ItemDetails(
-      {Key? key, required this.retrievedArtItem, required this.isLiked})
+      {Key? key,
+      required this.retrievedArtItem,
+      required this.isLiked,
+      required this.inCart})
       : super(key: key);
 
   final ArtItems retrievedArtItem;
-  final bool isLiked;
+  final bool isLiked, inCart;
 
   @override
   State<ItemDetails> createState() => _ItemDetailsState();
@@ -193,11 +196,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                               setState(() {
                                 _loading = true;
                               });
-                              addItemToCart();
-
-                              setState(() {
-                                _loading = false;
-                              });
+                              await addItemToCart();
                             },
                       child: Text(buttonText)),
                 ),
@@ -238,7 +237,7 @@ class _ItemDetailsState extends State<ItemDetails> {
     if (isInCart == true) {
       setState(() {
         buttonText = 'Already Added To Cart';
-        _loading = isInCart;
+        _loading = true;
       });
     } else {
       setState(() {
@@ -249,28 +248,18 @@ class _ItemDetailsState extends State<ItemDetails> {
   }
 
   void retrieveDefaultValues() async {
-    /*  bool isFavourite =
-        await databaseService.checkIfItemIsLIked(widget.retrievedArtItem.docId);
-
-    bool isInCart = await databaseService
-        .checkIfItemIsInCart(widget.retrievedArtItem.docId);
-
-    if (isInCart = true) {
+    if (widget.inCart == true) {
       setState(() {
         buttonText = 'Already Added To Cart';
       });
     } else {
-      print('here');
       setState(() {
         buttonText = 'Add To Cart';
       });
     }
-    
 
     setState(() {
-      isLiked = isFavourite;
-      _loading = isInCart;
+      _loading = widget.inCart;
     });
-    */
   }
 }

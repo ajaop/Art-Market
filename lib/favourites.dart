@@ -200,7 +200,7 @@ class FavouritesState extends State<Favourites> {
   }
 }
 
-class FavouriteItems extends StatelessWidget {
+class FavouriteItems extends StatefulWidget {
   const FavouriteItems(
       {Key? key,
       required this.position,
@@ -213,20 +213,31 @@ class FavouriteItems extends StatelessWidget {
   final getValues;
 
   @override
+  State<FavouriteItems> createState() => _FavouriteItemsState();
+}
+
+DatabaseService databaseService = DatabaseService();
+
+class _FavouriteItemsState extends State<FavouriteItems> {
+  @override
   Widget build(BuildContext context) {
     String artPrice = '₦ 0.0';
-
     artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
-        .format(retrievedArtItems?[position].artPrice);
+        .format(widget.retrievedArtItems?[widget.position].artPrice);
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        bool inCart = await checkAddedToCart();
+
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  ItemDetails(retrievedArtItem: retrievedArtItems![position]),
+              builder: (context) => ItemDetails(
+                retrievedArtItem: widget.retrievedArtItems![widget.position],
+                isLiked: true,
+                inCart: inCart,
+              ),
             )).then((value) {
-          getValues();
+          widget.getValues();
         });
       },
       child: Container(
@@ -246,7 +257,7 @@ class FavouriteItems extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                 child: FadeInImage.memoryNetwork(
                   placeholder: kTransparentImage,
-                  image: retrievedArtItems![position].imageUrl,
+                  image: widget.retrievedArtItems![widget.position].imageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -258,7 +269,7 @@ class FavouriteItems extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    retrievedArtItems![position].artName,
+                    widget.retrievedArtItems![widget.position].artName,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 20.0),
                   ),
@@ -277,5 +288,10 @@ class FavouriteItems extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> checkAddedToCart() async {
+    return await databaseService
+        .checkIfItemIsInCart(widget.retrievedArtItems![widget.position].docId);
   }
 }

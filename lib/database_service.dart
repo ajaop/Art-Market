@@ -129,11 +129,12 @@ class DatabaseService {
       (value) async {
         for (var docSnapshot in value.docs) {
           final artId = docSnapshot.data()['ArtId'];
+          final quantity = docSnapshot.data()['Quantity'];
 
           DocumentSnapshot<Map<String, dynamic>> snapshot =
               await _db.collection("arts").doc(artId).get();
 
-          cartItems.add(ArtItems.fromDocumentSnapshot(snapshot));
+          cartItems.add(ArtItems.fromCartDocumentSnapshot(snapshot, quantity));
         }
         return cartItems;
       },
@@ -154,6 +155,7 @@ class DatabaseService {
             .set({
           'ArtId': itemId,
           'ArtName': itemName,
+          'Quantity': 1,
           'DateAdded': DateTime.now()
         });
       } catch (e) {
@@ -179,11 +181,39 @@ class DatabaseService {
     }
   }
 
+  Future editQuantityInCart(itemId, qty, _messangerKey) async {
+    final User? user = auth.currentUser;
+
+    if (user!.uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Cart')
+            .doc(itemId)
+            .update({'Quantity': qty});
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+      }
+    }
+  }
+
   Future<bool> checkIfItemIsLIked(String itemId) async {
     final dynamic values = await FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
         .collection('LikedArt')
+        .doc(itemId)
+        .get();
+
+    return values.exists;
+  }
+
+  Future<bool> checkIfItemIsInCart(String itemId) async {
+    final dynamic values = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('Cart')
         .doc(itemId)
         .get();
 

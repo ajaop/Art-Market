@@ -274,27 +274,38 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-class CardArtItem extends StatelessWidget {
+class CardArtItem extends StatefulWidget {
   const CardArtItem(
       {Key? key, required this.index, required this.retrievedArtItems})
       : super(key: key);
 
   final int index;
   final List<ArtItems>? retrievedArtItems;
+
+  @override
+  State<CardArtItem> createState() => _CardArtItemState();
+}
+
+DatabaseService databaseService = DatabaseService();
+
+class _CardArtItemState extends State<CardArtItem> {
   @override
   Widget build(BuildContext context) {
     String artPrice = '₦ 0.0';
-
     artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
-        .format(retrievedArtItems?[index].artPrice);
+        .format(widget.retrievedArtItems?[widget.index].artPrice);
 
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        bool isFavourite = await checkFavourite();
+        bool inCart = await checkAddedToCart();
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  ItemDetails(retrievedArtItem: retrievedArtItems![index]),
+              builder: (context) => ItemDetails(
+                  retrievedArtItem: widget.retrievedArtItems![widget.index],
+                  isLiked: isFavourite,
+                  inCart: inCart),
             ));
       },
       child: Container(
@@ -310,7 +321,7 @@ class CardArtItem extends StatelessWidget {
                     topLeft: Radius.circular(15)),
                 child: FadeInImage.memoryNetwork(
                   placeholder: kTransparentImage,
-                  image: retrievedArtItems![index].imageUrl,
+                  image: widget.retrievedArtItems![widget.index].imageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -330,7 +341,7 @@ class CardArtItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
                     child: Text(
-                      retrievedArtItems![index].artName,
+                      widget.retrievedArtItems![widget.index].artName,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Color(0xff08110B),
@@ -359,5 +370,15 @@ class CardArtItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> checkFavourite() async {
+    return await databaseService
+        .checkIfItemIsLIked(widget.retrievedArtItems![widget.index].docId);
+  }
+
+  Future<bool> checkAddedToCart() async {
+    return await databaseService
+        .checkIfItemIsInCart(widget.retrievedArtItems![widget.index].docId);
   }
 }
