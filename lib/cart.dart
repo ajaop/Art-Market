@@ -1,3 +1,4 @@
+import 'package:art_market/address_page.dart';
 import 'package:art_market/favourites.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -189,8 +190,24 @@ class _CartState extends State<Cart> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             )),
-                        onPressed: _loading ? null : () {},
-                        child: Text('CHECKOUT'))
+                        onPressed: _loading
+                            ? null
+                            : () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => AddressPage()));
+                              },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Text('ADDRESS'),
+                            Icon(Icons.arrow_forward_ios),
+                          ],
+                        ))
                   ])),
               if (_loading)
                 const Center(
