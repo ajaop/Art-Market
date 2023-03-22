@@ -204,7 +204,7 @@ class _CartState extends State<Cart> {
                             SizedBox(
                               width: 5.0,
                             ),
-                            Text('ADDRESS'),
+                            Text('CHECKOUT'),
                             Icon(Icons.arrow_forward_ios),
                           ],
                         ))
