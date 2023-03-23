@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddressPage extends StatefulWidget {
   const AddressPage({Key? key}) : super(key: key);
@@ -7,8 +8,11 @@ class AddressPage extends StatefulWidget {
   State<AddressPage> createState() => _AddressPageState();
 }
 
+const List<String> list = <String>['Nigeria', 'Zimbabwe', 'Ghana', 'Togo'];
+
 class _AddressPageState extends State<AddressPage> {
   int _index = 0;
+  String dropdownValue = list.first;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -52,7 +56,68 @@ class _AddressPageState extends State<AddressPage> {
                     title: const Icon(Icons.location_on_outlined),
                     content: Container(
                         alignment: Alignment.centerLeft,
-                        child: const Text('Content for Step 1')),
+                        child: Column(
+                          children: [
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Country',
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff1B3823)),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 7.0,
+                            ),
+                            Container(
+                              height: 65.0,
+                              child: FormField(
+                                  builder: (FormFieldState<String> state) {
+                                return InputDecorator(
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(
+                                          width: 1.5, color: Color(0xff1B3823)),
+                                    ),
+                                    hintText: 'Nigeria',
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        30.0, 0, 0.0, 0),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        value: dropdownValue,
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16.0),
+                                        onChanged: (String? value) {
+                                          setState(() {
+                                            dropdownValue = value!;
+                                          });
+                                        },
+                                        items: list
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(
+                                              value,
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            )
+                          ],
+                        )),
                   ),
                   Step(
                     state: _index > 1 ? StepState.complete : StepState.indexed,
