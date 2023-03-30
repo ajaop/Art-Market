@@ -14,21 +14,18 @@ const List<String> list = <String>[
   'Ghana',
   'South Africa'
 ];
-var countryState = {
+var stateList = {
   'Nigeria': ['Lagos', 'Ogun', 'Oyo', 'Akwa Ibom'],
   'Zimbabwe': ['Bulawayo', 'Harare', 'Manicaland', 'Mashonaland Central'],
   'Ghana': ['Ahafo', 'Ashanti', 'Bono East', 'Brong Ahafo'],
   'South Africa': ['Eastern Cape', 'Gauteng', 'Limpopo', 'Mpumalanga']
 };
 
-var nigeriaCity = {
+var citiesList = {
   'Lagos': ['Lagos', 'Ikeja', 'Lekki', 'Okorodu'],
   'Ogun': ['Abokuta', 'Ijebu', 'Odeda', 'Sagamu'],
   'Oyo': ['Ibadan', 'Egbeda', 'Iseyin', 'Iyanaofa'],
-  'Akwa Ibom': ['Uyo', 'Abak', 'Ikot Abasi', 'Nsit-Ibom']
-};
-
-var zimbabweCity = {
+  'Akwa Ibom': ['Uyo', 'Abak', 'Ikot Abasi', 'Nsit-Ibom'],
   'Bulawayo': ['Barbourfields', 'Barham Green', 'Beacon Hill', 'Bellevue'],
   'Harare': ['Harare', 'Chitungwiza', 'Epworth', 'Ruwa'],
   'Manicaland': [
@@ -37,10 +34,7 @@ var zimbabweCity = {
     'Makoni District',
     'Mutasa District'
   ],
-  'Mashonaland Central': ['Bindura', 'Mbire', 'Guruve', 'Rushinga']
-};
-
-var ghanaState = {
+  'Mashonaland Central': ['Bindura', 'Mbire', 'Guruve', 'Rushinga'],
   'Ahafo': ['Goaso', 'Bechem', 'Duayaw Nkwanta', 'Techimantia'],
   'Ashanti': [
     'Adansi North',
@@ -59,10 +53,7 @@ var ghanaState = {
     'Ada East',
     'Ada West',
     'Adenta Municipal'
-  ]
-};
-
-var southAfricaCity = {
+  ],
   'Eastern Cape': ['Mthatha ', 'Komani', 'Makhanda', 'Dikeni'],
   'Gauteng': ['Johannesburg', 'Boksburg', 'Alberton', 'Carletonville'],
   'Limpopo': [
@@ -79,11 +70,11 @@ var southAfricaCity = {
 };
 
 class _AddressPageState extends State<AddressPage> {
+  final _formKey = GlobalKey<FormState>(),
+      _streetAddressController = TextEditingController();
+
   int _index = 0;
-  String? countryDropdownValue = list.first,
-      stateDropdownValue,
-      cityDropdownValue = list.first;
-  String countryName = "'" + "Nigeria" + "'";
+  String? countryDropdownValue, stateDropdownValue, cityDropdownValue;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -120,6 +111,9 @@ class _AddressPageState extends State<AddressPage> {
                     _index = index;
                   });
                 },
+                controlsBuilder: (context, controller) {
+                  return const SizedBox.shrink();
+                },
                 steps: <Step>[
                   Step(
                     state: _index > 0 ? StepState.complete : StepState.indexed,
@@ -129,139 +123,253 @@ class _AddressPageState extends State<AddressPage> {
                         alignment: Alignment.centerLeft,
                         child: Column(
                           children: [
-                            const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Country',
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff1B3823)),
-                              ),
+                            const Text(
+                              'ADDRESS',
+                              style: TextStyle(
+                                  fontSize: 25.0, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(
-                              height: 5.0,
+                              height: 35.0,
                             ),
-                            DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                hintText: 'Niger',
-                              ),
-                              value: countryDropdownValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  countryDropdownValue = value!;
-                                  countryName =
-                                      "'" + countryDropdownValue! + "'";
-                                  print(countryName);
-                                });
-                              },
-                              items: list.map<DropdownMenuItem<String>>(
-                                  (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        10.0, 0, 0, 0),
-                                    child: Text(
-                                      value,
-                                      style: TextStyle(color: Colors.black),
+                            Form(
+                                key: _formKey,
+                                child: Column(
+                                  children: [
+                                    const Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        'Country',
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff1B3823)),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)
+                                                  .copyWith(
+                                                      bottomRight:
+                                                          Radius.circular(0)),
+                                        ),
+                                      ),
+                                      value: countryDropdownValue,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          countryDropdownValue = value!;
+                                          stateDropdownValue = null;
+                                          cityDropdownValue = null;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value?.isEmpty ?? true) {
+                                          return 'Country is required';
+                                        }
+                                      },
+                                      items: list.map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                10.0, 0, 0, 0),
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    SizedBox(
+                                      height: 30.0,
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'State',
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff1B3823)),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)
+                                                  .copyWith(
+                                                      bottomRight:
+                                                          Radius.circular(0)),
+                                        ),
+                                      ),
+                                      value: stateDropdownValue,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          stateDropdownValue = value!;
+                                          cityDropdownValue = null;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value?.isEmpty ?? true) {
+                                          return 'State is required';
+                                        }
+                                      },
+                                      items: stateList[countryDropdownValue]
+                                          ?.map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                10.0, 0, 0, 0),
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    SizedBox(
+                                      height: 30.0,
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'City',
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff1B3823)),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)
+                                                  .copyWith(
+                                                      bottomRight:
+                                                          Radius.circular(0)),
+                                        ),
+                                      ),
+                                      value: cityDropdownValue,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          cityDropdownValue = value!;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value?.isEmpty ?? true) {
+                                          return 'City is required';
+                                        }
+                                      },
+                                      items: citiesList[stateDropdownValue]
+                                          ?.map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                10.0, 0, 0, 0),
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    SizedBox(
+                                      height: 30.0,
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'Street Address',
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff1B3823)),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    TextFormField(
+                                      maxLines: 2,
+                                      controller: _streetAddressController,
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.location_city_outlined,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        hintText:
+                                            'No 12 Block 5 Samson Los Street, Ajadi',
+                                      ),
+                                      inputFormatters: [
+                                        LengthLimitingTextInputFormatter(200),
+                                      ],
+                                      keyboardType: TextInputType.streetAddress,
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                      onFieldSubmitted: (value) {},
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return 'Street Address is required';
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                )),
                             SizedBox(
-                              height: 30.0,
+                              height: 60.0,
                             ),
-                            Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Text(
-                                'State',
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff1B3823)),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5.0,
-                            ),
-                            DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                hintText: 'Lagos',
-                              ),
-                              value: stateDropdownValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  stateDropdownValue = value!;
-                                });
-                              },
-                              items: countryState[countryName]
-                                  ?.map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        10.0, 0, 0, 0),
-                                    child: Text(
-                                      value,
-                                      style: TextStyle(color: Colors.black),
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Color(0xff2E5F3B),
+                                    minimumSize: const Size.fromHeight(70),
+                                    textStyle: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontFamily: 'OpenSans',
+                                        fontWeight: FontWeight.bold),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    )),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {}
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    SizedBox(
+                                      width: 5.0,
                                     ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(
-                              height: 30.0,
-                            ),
-                            Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Text(
-                                'City',
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff1B3823)),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5.0,
-                            ),
-                            DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                hintText: 'Lagos',
-                              ),
-                              value: cityDropdownValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  cityDropdownValue = value!;
-                                });
-                              },
-                              items: list.map<DropdownMenuItem<String>>(
-                                  (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        10.0, 0, 0, 0),
-                                    child: Text(
-                                      value,
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            )
+                                    Text('PAYMENT'),
+                                    Icon(Icons.arrow_forward_ios),
+                                  ],
+                                ))
                           ],
                         )),
                   ),
