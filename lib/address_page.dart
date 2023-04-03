@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_credit_card/credit_card_brand.dart';
+import 'package:flutter_credit_card/credit_card_widget.dart';
+import 'package:flutter_credit_card/flutter_credit_card.dart';
 
 class AddressPage extends StatefulWidget {
   const AddressPage({Key? key}) : super(key: key);
@@ -71,10 +74,17 @@ var citiesList = {
 
 class _AddressPageState extends State<AddressPage> {
   final _formKey = GlobalKey<FormState>(),
-      _streetAddressController = TextEditingController();
+      _formKey2 = GlobalKey<FormState>(),
+      _streetAddressController = TextEditingController(),
+      cardNumberKey = TextEditingController();
 
   int _index = 0;
   String? countryDropdownValue, stateDropdownValue, cityDropdownValue;
+  String cardNumber = '', expiryDate = '', cardHolderName = '', cvvCode = '';
+  bool isCvvFocused = false,
+      useGlassMorphism = false,
+      useBackgroundImage = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -88,7 +98,7 @@ class _AddressPageState extends State<AddressPage> {
         home: Scaffold(
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0),
               child: Stepper(
                 currentStep: _index,
                 type: StepperType.horizontal,
@@ -119,265 +129,13 @@ class _AddressPageState extends State<AddressPage> {
                     state: _index > 0 ? StepState.complete : StepState.indexed,
                     isActive: _index >= 0,
                     title: const Icon(Icons.location_on_outlined),
-                    content: Container(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          children: [
-                            const Text(
-                              'ADDRESS',
-                              style: TextStyle(
-                                  fontSize: 25.0, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 35.0,
-                            ),
-                            Form(
-                                key: _formKey,
-                                child: Column(
-                                  children: [
-                                    const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        'Country',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff1B3823)),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5.0,
-                                    ),
-                                    DropdownButtonFormField<String>(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)
-                                                  .copyWith(
-                                                      bottomRight:
-                                                          Radius.circular(0)),
-                                        ),
-                                      ),
-                                      value: countryDropdownValue,
-                                      onChanged: (String? value) {
-                                        setState(() {
-                                          countryDropdownValue = value!;
-                                          stateDropdownValue = null;
-                                          cityDropdownValue = null;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        if (value?.isEmpty ?? true) {
-                                          return 'Country is required';
-                                        }
-                                      },
-                                      items: list.map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10.0, 0, 0, 0),
-                                            child: Text(
-                                              value,
-                                              style: TextStyle(
-                                                  color: Colors.black),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    SizedBox(
-                                      height: 30.0,
-                                    ),
-                                    Align(
-                                      alignment: Alignment.bottomLeft,
-                                      child: Text(
-                                        'State',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff1B3823)),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5.0,
-                                    ),
-                                    DropdownButtonFormField<String>(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)
-                                                  .copyWith(
-                                                      bottomRight:
-                                                          Radius.circular(0)),
-                                        ),
-                                      ),
-                                      value: stateDropdownValue,
-                                      onChanged: (String? value) {
-                                        setState(() {
-                                          stateDropdownValue = value!;
-                                          cityDropdownValue = null;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        if (value?.isEmpty ?? true) {
-                                          return 'State is required';
-                                        }
-                                      },
-                                      items: stateList[countryDropdownValue]
-                                          ?.map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10.0, 0, 0, 0),
-                                            child: Text(
-                                              value,
-                                              style: TextStyle(
-                                                  color: Colors.black),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    SizedBox(
-                                      height: 30.0,
-                                    ),
-                                    Align(
-                                      alignment: Alignment.bottomLeft,
-                                      child: Text(
-                                        'City',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff1B3823)),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5.0,
-                                    ),
-                                    DropdownButtonFormField<String>(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)
-                                                  .copyWith(
-                                                      bottomRight:
-                                                          Radius.circular(0)),
-                                        ),
-                                      ),
-                                      value: cityDropdownValue,
-                                      onChanged: (String? value) {
-                                        setState(() {
-                                          cityDropdownValue = value!;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        if (value?.isEmpty ?? true) {
-                                          return 'City is required';
-                                        }
-                                      },
-                                      items: citiesList[stateDropdownValue]
-                                          ?.map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10.0, 0, 0, 0),
-                                            child: Text(
-                                              value,
-                                              style: TextStyle(
-                                                  color: Colors.black),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    SizedBox(
-                                      height: 30.0,
-                                    ),
-                                    Align(
-                                      alignment: Alignment.bottomLeft,
-                                      child: Text(
-                                        'Street Address',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff1B3823)),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5.0,
-                                    ),
-                                    TextFormField(
-                                      maxLines: 2,
-                                      controller: _streetAddressController,
-                                      decoration: InputDecoration(
-                                        prefixIcon: Icon(
-                                          Icons.location_city_outlined,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        hintText:
-                                            'No 12 Block 5 Samson Los Street, Ajadi',
-                                      ),
-                                      inputFormatters: [
-                                        LengthLimitingTextInputFormatter(200),
-                                      ],
-                                      keyboardType: TextInputType.streetAddress,
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      onFieldSubmitted: (value) {},
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return 'Street Address is required';
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                )),
-                            SizedBox(
-                              height: 60.0,
-                            ),
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    primary: Color(0xff2E5F3B),
-                                    minimumSize: const Size.fromHeight(70),
-                                    textStyle: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontFamily: 'OpenSans',
-                                        fontWeight: FontWeight.bold),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    )),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {}
-                                },
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    SizedBox(
-                                      width: 5.0,
-                                    ),
-                                    Text('PAYMENT'),
-                                    Icon(Icons.arrow_forward_ios),
-                                  ],
-                                ))
-                          ],
-                        )),
+                    content: addressStage(),
                   ),
                   Step(
                     state: _index > 1 ? StepState.complete : StepState.indexed,
                     isActive: _index >= 1,
                     title: const Icon(Icons.payment_outlined),
-                    content: Text('Content for Step 2'),
+                    content: cardDetailsStage(),
                   ),
                   Step(
                     state: _index > 2 ? StepState.complete : StepState.indexed,
@@ -390,5 +148,416 @@ class _AddressPageState extends State<AddressPage> {
             ),
           ),
         ));
+  }
+
+  Container addressStage() {
+    return Container(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          children: [
+            const Text(
+              'ADDRESS',
+              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 35.0,
+            ),
+            Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Country',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff1B3823)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20)
+                              .copyWith(bottomRight: Radius.circular(0)),
+                        ),
+                      ),
+                      value: countryDropdownValue,
+                      onChanged: (String? value) {
+                        setState(() {
+                          countryDropdownValue = value!;
+                          stateDropdownValue = null;
+                          cityDropdownValue = null;
+                        });
+                      },
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Country is required';
+                        }
+                      },
+                      items: list.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+                            child: Text(
+                              value,
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        'State',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff1B3823)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20)
+                              .copyWith(bottomRight: Radius.circular(0)),
+                        ),
+                      ),
+                      value: stateDropdownValue,
+                      onChanged: (String? value) {
+                        setState(() {
+                          stateDropdownValue = value!;
+                          cityDropdownValue = null;
+                        });
+                      },
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'State is required';
+                        }
+                      },
+                      items: stateList[countryDropdownValue]
+                          ?.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+                            child: Text(
+                              value,
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        'City',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff1B3823)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20)
+                              .copyWith(bottomRight: Radius.circular(0)),
+                        ),
+                      ),
+                      value: cityDropdownValue,
+                      onChanged: (String? value) {
+                        setState(() {
+                          cityDropdownValue = value!;
+                        });
+                      },
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'City is required';
+                        }
+                      },
+                      items: citiesList[stateDropdownValue]
+                          ?.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+                            child: Text(
+                              value,
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        'Street Address',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff1B3823)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
+                    TextFormField(
+                      controller: _streetAddressController,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.location_city_outlined,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        hintText: 'No 12 Block 5 Samson Los Street, Ajadi',
+                      ),
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(200),
+                      ],
+                      keyboardType: TextInputType.streetAddress,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      onFieldSubmitted: (value) {},
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Street Address is required';
+                        }
+                      },
+                    ),
+                  ],
+                )),
+            SizedBox(
+              height: 60.0,
+            ),
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    primary: Color(0xff2E5F3B),
+                    minimumSize: const Size.fromHeight(65),
+                    textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontFamily: 'OpenSans',
+                        fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    )),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      _index += 1;
+                    });
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: 5.0,
+                    ),
+                    Text('PAYMENT'),
+                    Icon(Icons.arrow_forward_ios),
+                  ],
+                ))
+          ],
+        ));
+  }
+
+  Container cardDetailsStage() {
+    return Container(
+        child: Column(
+      children: [
+        Text(
+          'PAYMENT',
+          style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: 20.0,
+        ),
+        CreditCardWidget(
+          cardNumber: cardNumber,
+          expiryDate: expiryDate,
+          cardHolderName: cardHolderName,
+          cvvCode: cvvCode,
+          bankName: '    ',
+          showBackView: isCvvFocused,
+          obscureCardNumber: true,
+          obscureCardCvv: true,
+          isHolderNameVisible: true,
+          isChipVisible: false,
+          cardBgColor: Colors.black,
+          backgroundImage: 'images/card_image.jpg',
+          isSwipeGestureEnabled: true,
+          onCreditCardWidgetChange: (CreditCardBrand creditCardBrand) {},
+          customCardTypeIcons: <CustomCardTypeIcon>[
+            CustomCardTypeIcon(
+              cardType: CardType.mastercard,
+              cardImage: Image.asset(
+                'assets/mastercard.png',
+                height: 48,
+                width: 48,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 20.0,
+        ),
+        SingleChildScrollView(
+            child: Column(children: <Widget>[
+          CreditCardForm(
+            formKey: _formKey2,
+            cardNumberValidator: (String? cardNumber) {
+              if (cardNumber!.isEmpty) {
+                return 'Card Number is required';
+              }
+            },
+            expiryDateValidator: (String? expiryDate) {
+              if (expiryDate!.isEmpty) {
+                return 'Expiry Date is required';
+              }
+            },
+            cvvValidator: (String? cvv) {
+              if (cvv!.isEmpty) {
+                return 'CVV is required';
+              }
+            },
+            cardHolderValidator: (String? cardHolderName) {
+              if (cardHolderName!.isEmpty) {
+                return 'Card Holder Name is required';
+              }
+            },
+            obscureCvv: true,
+            obscureNumber: true,
+            cardNumber: cardNumber,
+            cvvCode: cvvCode,
+            isHolderNameVisible: true,
+            isCardNumberVisible: true,
+            isExpiryDateVisible: true,
+            cardHolderName: cardHolderName,
+            expiryDate: expiryDate,
+            themeColor: Color(0xffC9E4D0),
+            textColor: Colors.black,
+            cardNumberDecoration: InputDecoration(
+              labelText: 'Card Number',
+              hintText: 'XXXX XXXX XXXX XXXX',
+              hintStyle: const TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
+              ),
+            ),
+            expiryDateDecoration: InputDecoration(
+              hintStyle: const TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
+              ),
+              labelText: 'Expiry Date',
+              hintText: 'XX/XX',
+            ),
+            cvvCodeDecoration: InputDecoration(
+              hintStyle: const TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
+              ),
+              labelText: 'CVV',
+              hintText: 'XXX',
+            ),
+            cardHolderDecoration: InputDecoration(
+              hintStyle: const TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
+              ),
+              labelText: 'Card Holder',
+            ),
+            onCreditCardModelChange: onCreditCardModelChange,
+          ),
+          SizedBox(
+            height: 60.0,
+          ),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  primary: Color(0xff2E5F3B),
+                  minimumSize: const Size.fromHeight(65),
+                  textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  )),
+              onPressed: () {
+                if (_formKey2.currentState!.validate()) {
+                  setState(() {
+                    _index += 1;
+                  });
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  SizedBox(
+                    width: 5.0,
+                  ),
+                  Text('PAYMENT'),
+                  Icon(Icons.arrow_forward_ios),
+                ],
+              ))
+        ]))
+      ],
+    ));
+  }
+
+  void onCreditCardModelChange(CreditCardModel? creditCardModel) {
+    setState(() {
+      cardNumber = creditCardModel!.cardNumber;
+      expiryDate = creditCardModel.expiryDate;
+      cardHolderName = creditCardModel.cardHolderName;
+      cvvCode = creditCardModel.cvvCode;
+      isCvvFocused = creditCardModel.isCvvFocused;
+    });
   }
 }
