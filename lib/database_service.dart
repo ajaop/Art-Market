@@ -220,6 +220,47 @@ class DatabaseService {
     return values.exists;
   }
 
+  Future addToOrders(itemsList, amount, _messangerKey) async {
+    final User? user = auth.currentUser;
+
+    if (user!.uid.isNotEmpty) {
+      try {
+        String id = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Orders')
+            .doc()
+            .id;
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Orders')
+            .doc(id)
+            .set(
+          {
+            'TotalAmount': amount,
+            'OrderDate': DateTime.now(),
+            'Status': 'Ordered',
+          },
+        ).then((value) async {
+          for (ArtItems artItem in itemsList) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('Orders')
+                .doc(id)
+                .collection('Items')
+                .doc()
+                .set(artItem.toMap());
+          }
+        });
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
+        print(e.toString());
+      }
+    }
+  }
+
   void displayError(errorMessage, _messangerKey) {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,

@@ -196,7 +196,11 @@ class _CartState extends State<Cart> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => AddressPage()));
+                                        builder: (context) => AddressPage(
+                                              amount: totalText,
+                                              retrievedItemsList:
+                                                  retrievedItemsList,
+                                            )));
                               },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
