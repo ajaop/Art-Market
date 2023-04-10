@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_credit_card/credit_card_brand.dart';
 import 'package:flutter_credit_card/credit_card_widget.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
@@ -108,6 +109,7 @@ class _AddressPageState extends State<AddressPage> {
       useBackgroundImage = false;
   DatabaseService databaseService = DatabaseService();
   var addressBtnColor = Color(0xff2E5F3B), paymentBtnColor = Color(0xff2E5F3B);
+  bool _loading = false;
 
   @override
   void initState() {
@@ -612,278 +614,316 @@ class _AddressPageState extends State<AddressPage> {
 
   Container confirmOrderStage() {
     return Container(
-        child: Column(
+        child: Stack(
       children: [
-        ListView(
-          shrinkWrap: true,
+        Column(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: const Text(
-                'CONFIRM ORDER',
-                style: TextStyle(fontSize: 23.0, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(
-              height: 40.0,
-            ),
-            const Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'Payment Information',
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            Container(
-              height: 85.0,
-              decoration: BoxDecoration(
-                  color: Colors.black,
-                  image: const DecorationImage(
-                    image: AssetImage('images/card_image.jpg'),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius: BorderRadius.circular(15.0)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
-                    child: Container(
-                      height: 45.0,
-                      width: 45.0,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color(0xff255C3F),
-                          ),
-                          borderRadius: BorderRadius.circular(15.0)),
-                      child: const Icon(
-                        Icons.credit_card_outlined,
-                        size: 30.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          cardNamVal,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Text(
-                          cardNumVal.substring(0, 4) +
-                              ' **** **** ' +
-                              cardNumVal.substring(15, 19),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[400]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _index = 1;
-                        });
-                      },
-                      child: const SizedBox(
-                        height: 55.0,
-                        width: 50.0,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.edit_outlined,
-                            size: 25.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 50.0,
-            ),
-            const Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'Delivery Address',
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            Container(
-              height: 85.0,
-              decoration: BoxDecoration(
-                  color: Color(0xffF1F1F1),
-                  borderRadius: BorderRadius.circular(15.0)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
-                    child: Container(
-                      height: 45.0,
-                      width: 45.0,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.circular(15.0)),
-                      child: const Icon(
-                        Icons.delivery_dining,
-                        size: 30.0,
-                        color: Color(0xff255C3F),
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          stateVal + ', ' + countryVal,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          streetAddVal,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _index = 0;
-                        });
-                      },
-                      child: const SizedBox(
-                        height: 55.0,
-                        width: 50.0,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.edit_outlined,
-                            size: 25.0,
-                            color: Color(0xff255C3F),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 60.0,
-            ),
-            const DottedLine(
-              direction: Axis.horizontal,
-              lineLength: double.infinity,
-              lineThickness: 0.5,
-              dashLength: 7.0,
-              dashColor: Colors.grey,
-              dashRadius: 0.0,
-              dashGapLength: 4.0,
-              dashGapColor: Colors.transparent,
-              dashGapRadius: 0.0,
-            ),
-            SizedBox(
-              height: 20.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ListView(
+              shrinkWrap: true,
               children: [
-                const Text('Amount',
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: const Text(
+                    'CONFIRM ORDER',
                     style:
-                        TextStyle(fontWeight: FontWeight.w700, fontSize: 21.0)),
-                Text(widget.amount,
+                        TextStyle(fontSize: 23.0, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(
+                  height: 40.0,
+                ),
+                const Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    'Payment Information',
                     style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 19.0))
+                        TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Container(
+                  height: 85.0,
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      image: const DecorationImage(
+                        image: AssetImage('images/card_image.jpg'),
+                        fit: BoxFit.fill,
+                      ),
+                      borderRadius: BorderRadius.circular(15.0)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
+                        child: Container(
+                          height: 45.0,
+                          width: 45.0,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color(0xff255C3F),
+                              ),
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: const Icon(
+                            Icons.credit_card_outlined,
+                            size: 30.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              cardNamVal,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
+                            Text(
+                              cardNumVal.substring(0, 4) +
+                                  ' **** **** ' +
+                                  cardNumVal.substring(15, 19),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _index = 1;
+                            });
+                          },
+                          child: const SizedBox(
+                            height: 55.0,
+                            width: 50.0,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.edit_outlined,
+                                size: 25.0,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 50.0,
+                ),
+                const Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    'Delivery Address',
+                    style:
+                        TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Container(
+                  height: 85.0,
+                  decoration: BoxDecoration(
+                      color: Color(0xffF1F1F1),
+                      borderRadius: BorderRadius.circular(15.0)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
+                        child: Container(
+                          height: 45.0,
+                          width: 45.0,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black,
+                              ),
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: const Icon(
+                            Icons.delivery_dining,
+                            size: 30.0,
+                            color: Color(0xff255C3F),
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              stateVal + ', ' + countryVal,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Text(
+                              streetAddVal,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(5.0, 0, 5.0, 0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _index = 0;
+                            });
+                          },
+                          child: const SizedBox(
+                            height: 55.0,
+                            width: 50.0,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.edit_outlined,
+                                size: 25.0,
+                                color: Color(0xff255C3F),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 60.0,
+                ),
+                const DottedLine(
+                  direction: Axis.horizontal,
+                  lineLength: double.infinity,
+                  lineThickness: 0.5,
+                  dashLength: 7.0,
+                  dashColor: Colors.grey,
+                  dashRadius: 0.0,
+                  dashGapLength: 4.0,
+                  dashGapColor: Colors.transparent,
+                  dashGapRadius: 0.0,
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Amount',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 21.0)),
+                    Text(widget.amount,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 19.0))
+                  ],
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                DottedLine(
+                  direction: Axis.horizontal,
+                  lineLength: double.infinity,
+                  lineThickness: 0.5,
+                  dashLength: 7.0,
+                  dashColor: Colors.grey,
+                  dashRadius: 0.0,
+                  dashGapLength: 4.0,
+                  dashGapColor: Colors.transparent,
+                  dashGapRadius: 0.0,
+                ),
+                SizedBox(
+                  height: 90.0,
+                ),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Color(0xff2E5F3B),
+                        minimumSize: const Size.fromHeight(65),
+                        textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontFamily: 'OpenSans',
+                            fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        )),
+                    onPressed: _loading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            bool addOrder = await databaseService.addToOrders(
+                                widget.retrievedItemsList,
+                                widget.amount,
+                                _messangerKey);
+                            if (addOrder == true) {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => OrderSuccess(
+                                            title: 'SUCCESS',
+                                            amount: widget.amount,
+                                            retrievedItemsList:
+                                                widget.retrievedItemsList,
+                                          ))),
+                                  (Route<dynamic> route) => route.isFirst);
+                            } else {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => OrderSuccess(
+                                            title: 'FAILURE',
+                                            amount: widget.amount,
+                                            retrievedItemsList:
+                                                widget.retrievedItemsList,
+                                          ))),
+                                  (Route<dynamic> route) => route.isFirst);
+                            }
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                    child: Text('Place Order'))
               ],
-            ),
-            SizedBox(
-              height: 20.0,
-            ),
-            DottedLine(
-              direction: Axis.horizontal,
-              lineLength: double.infinity,
-              lineThickness: 0.5,
-              dashLength: 7.0,
-              dashColor: Colors.grey,
-              dashRadius: 0.0,
-              dashGapLength: 4.0,
-              dashGapColor: Colors.transparent,
-              dashGapRadius: 0.0,
-            ),
-            SizedBox(
-              height: 90.0,
-            ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: Color(0xff2E5F3B),
-                    minimumSize: const Size.fromHeight(65),
-                    textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontFamily: 'OpenSans',
-                        fontWeight: FontWeight.bold),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    )),
-                onPressed: () async {
-                  await databaseService.addToOrders(
-                      widget.retrievedItemsList, widget.amount, _messangerKey);
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => OrderSuccess(
-                                title: 'SUCCESS',
-                                amount: widget.amount,
-                                retrievedItemsList: widget.retrievedItemsList,
-                              ))),
-                      (Route<dynamic> route) => route.isFirst);
-                },
-                child: Text('Place Order'))
+            )
           ],
-        )
+        ),
+        if (_loading)
+          const Center(
+            child: SpinKitSquareCircle(
+              color: Color(0xff2E5F3B),
+              size: 100.0,
+            ),
+          )
       ],
     ));
   }

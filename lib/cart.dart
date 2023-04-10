@@ -21,7 +21,7 @@ class _CartState extends State<Cart> {
   Future<List<ArtItems>>? itemsList;
   List<ArtItems>? retrievedItemsList;
   DatabaseService databaseService = DatabaseService();
-  bool _loading = false;
+  bool _loading = false, _empty = false;
   String subTotalText = "₦ 0.0", vatText = "₦ 0.0", totalText = "₦ 0.0";
 
   @override
@@ -69,6 +69,7 @@ class _CartState extends State<Cart> {
                             if (snapshot.connectionState ==
                                     ConnectionState.done &&
                                 retrievedItemsList?.isEmpty == null) {
+                              _empty = true;
                               const Center(
                                 child: Text(
                                   'No Item in Cart Yet',
@@ -89,6 +90,8 @@ class _CartState extends State<Cart> {
                             }
 
                             if (snapshot.hasData && snapshot.data != null) {
+                              _empty = false;
+
                               return ListView.separated(
                                   scrollDirection: Axis.vertical,
                                   shrinkWrap: true,
@@ -190,7 +193,7 @@ class _CartState extends State<Cart> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             )),
-                        onPressed: _loading
+                        onPressed: _loading || _empty
                             ? null
                             : () {
                                 Navigator.push(
@@ -200,7 +203,9 @@ class _CartState extends State<Cart> {
                                               amount: totalText,
                                               retrievedItemsList:
                                                   retrievedItemsList,
-                                            )));
+                                            ))).then((value) {
+                                  getDefaultValues();
+                                });
                               },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -234,6 +239,12 @@ class _CartState extends State<Cart> {
 
     itemsList = databaseService.retrieveCart();
     retrievedItemsList = await databaseService.retrieveCart();
+
+    if (retrievedItemsList?.isEmpty ?? true) {
+      setState(() {
+        _empty = true;
+      });
+    }
 
     if (retrievedItemsList?.isNotEmpty ?? true) {
       int subTotal = await sumAllItems();

@@ -220,7 +220,7 @@ class DatabaseService {
     return values.exists;
   }
 
-  Future addToOrders(itemsList, amount, _messangerKey) async {
+  Future<bool> addToOrders(itemsList, amount, _messangerKey) async {
     final User? user = auth.currentUser;
 
     if (user!.uid.isNotEmpty) {
@@ -253,10 +253,34 @@ class DatabaseService {
                 .doc()
                 .set(artItem.toMap());
           }
+        }).then((value) async {
+          await deleteCart(_messangerKey);
         });
+        return true;
       } catch (e) {
         displayError(e.toString(), _messangerKey);
-        print(e.toString());
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  Future deleteCart(_messangerKey) async {
+    final User? user = auth.currentUser;
+
+    if (user!.uid.isNotEmpty) {
+      try {
+        var collection = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Cart');
+        var snapshots = await collection.get();
+        for (var doc in snapshots.docs) {
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        displayError(e.toString(), _messangerKey);
       }
     }
   }
