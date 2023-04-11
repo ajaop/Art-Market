@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'Orders.dart';
+
 class DatabaseService {
   FirebaseFirestore _db = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -283,6 +285,19 @@ class DatabaseService {
         displayError(e.toString(), _messangerKey);
       }
     }
+  }
+
+  Future<List<Orders>> retrieveOrders() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await _db
+        .collection('users')
+        .doc(user!.uid)
+        .collection('Orders')
+        .get()
+        .then((value) => {});
+
+    return snapshot.docs
+        .map((docSnapshot) => Orders.fromDocumentSnapshot(docSnapshot))
+        .toList();
   }
 
   void displayError(errorMessage, _messangerKey) {
