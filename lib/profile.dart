@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
@@ -100,8 +101,6 @@ class _ProfileState extends State<Profile> {
                           child: InkWell(
                             onTap: () {
                               _showPopupMenu();
-                              /* 
-                                      */
                             },
                             child: const CircleAvatar(
                               backgroundColor: Color(0xff95C2A1),
@@ -335,7 +334,7 @@ class _ProfileState extends State<Profile> {
         PopupMenuItem(
           child: TextButton(
               onPressed: () {
-                _signOut();
+                _signOutDialogBuilder(context);
               },
               child: Row(
                 children: const [
@@ -680,6 +679,84 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  Future<void> _signOutDialogBuilder(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          barrierColor:
+          Colors.black26;
+          return Dialog(
+            elevation: 0,
+            backgroundColor: Color(0xffffffff),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 20.0,
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(50.0, 20, 50.0, 20),
+                  child: Center(
+                    child: Text(
+                      'Are you sure you want to sign out ? ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.green[900]),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 60.0,
+                    ),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            elevation: 5.0,
+                            primary: Color.fromARGB(255, 183, 181, 181),
+                            minimumSize: const Size(100, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0))),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('No', style: TextStyle(fontSize: 17.0))),
+                    SizedBox(
+                      width: 20.0,
+                    ),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            elevation: 5.0,
+                            primary: Color(0xff2E5F3B),
+                            minimumSize: const Size(100, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0))),
+                        onPressed: () {
+                          _signOut();
+                        },
+                        child: Text(
+                          'Yes',
+                          style: TextStyle(fontSize: 17.0),
+                        )),
+                  ],
+                ),
+                SizedBox(
+                  height: 40.0,
+                )
+              ],
+            ),
+          );
+        });
+  }
+
   void _changePassword(StateSetter setModalState2, String password) async {
     setState(() {
       _loading = true;
@@ -690,14 +767,17 @@ class _ProfileState extends State<Profile> {
 
     final User? user = auth.currentUser;
 
-    await user!.updatePassword(password).then((_) async {
-      Navigator.pop(context);
-      displaySuccess('Password Change Successful');
-    }).catchError((error) {
-      Navigator.pop(context);
-      displayError(error.toString());
-    });
-
+    try {
+      await user!.updatePassword(password).then((_) async {
+        Navigator.pop(context);
+        displaySuccess('Password Change Successful');
+      }).catchError((error) {
+        Navigator.pop(context);
+        displayError("User needs to sign out and re login");
+      });
+    } catch (e) {
+      print(e.toString());
+    }
     setState(() {
       _loading = false;
     });
@@ -708,19 +788,10 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _signOut() async {
-    setState(() {
-      _imageLoaded = false;
-      _loading = true;
-    });
-
     await FirebaseAuth.instance.signOut();
     final User? user = auth.currentUser;
-    if (user?.uid.isEmpty == null) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/', (Route<dynamic> route) => false);
-    } else {
-      print("user Id ${user!.uid}");
-    }
+    Navigator.pushNamedAndRemoveUntil(
+        context, '/', (Route<dynamic> route) => false);
   }
 
   Container orderWidget(int position) {
@@ -1089,21 +1160,31 @@ class _ProfileState extends State<Profile> {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.red[600],
+        duration: const Duration(seconds: 5),
         elevation: 0,
         content: Text(
           errorMessage,
           textAlign: TextAlign.center,
         )));
+
+    Timer(Duration(seconds: 5), () {
+      _messangerKey.currentState!.hideCurrentSnackBar();
+    });
   }
 
   void displaySuccess(successMessage) {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.green[600],
+        duration: const Duration(seconds: 5),
         elevation: 0,
         content: Text(
           successMessage,
           textAlign: TextAlign.center,
         )));
+
+    Timer(Duration(seconds: 5), () {
+      _messangerKey.currentState!.hideCurrentSnackBar();
+    });
   }
 }
