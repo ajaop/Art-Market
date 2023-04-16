@@ -31,6 +31,24 @@ class DatabaseService {
     return imageText;
   }
 
+  Future<String> getUserDetails(context, _messengerKey) async {
+    String firstName = "", lastName = "", fullName = "";
+
+    await FirebaseFirestore.instance
+        .collection("users")
+        .where('userId', isEqualTo: user!.uid)
+        .limit(1)
+        .get()
+        .then((value) => value.docs.forEach((doc) {
+              lastName = doc.data()['lastname'].toString();
+              firstName = doc.data()['firstname'].toString();
+              String fullName = lastName + " " + firstName;
+            }))
+        .onError((error, stackTrace) => displayError(error, _messengerKey));
+
+    return fullName;
+  }
+
   Future<List<ArtItems>> retrieveArt() async {
     QuerySnapshot<Map<String, dynamic>> snapshot =
         await _db.collection("arts").get();
@@ -288,12 +306,8 @@ class DatabaseService {
   }
 
   Future<List<Orders>> retrieveOrders() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await _db
-        .collection('users')
-        .doc(user!.uid)
-        .collection('Orders')
-        .get()
-        .then((value) => {});
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _db.collection('users').doc(user!.uid).collection('Orders').get();
 
     return snapshot.docs
         .map((docSnapshot) => Orders.fromDocumentSnapshot(docSnapshot))

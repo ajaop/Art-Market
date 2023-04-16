@@ -43,6 +43,15 @@ class ArtItems {
         docId = doc.id,
         quantity = doc.data()?["Quantity"] ?? 0;
 
+  ArtItems.fromOrdersDocumentSnapshot(
+      DocumentSnapshot<Map<String, dynamic>> doc)
+      : artType = doc.data()!["ArtType"],
+        imageUrl = doc.data()!["ImageUrl"],
+        artName = doc.data()!["ArtName"],
+        artPrice = doc.data()!["ArtPrice"],
+        docId = doc.id,
+        quantity = doc.data()?["Quantity"] ?? 0;
+
   ArtItems.fromCartDocumentSnapshot(
       DocumentSnapshot<Map<String, dynamic>> doc, qty)
       : artType = doc.data()!["ArtType"],
