@@ -57,20 +57,28 @@ class FavouritesState extends State<Favourites> {
                                 const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
                             child: Align(
                               alignment: Alignment.center,
-                              child: TextFormField(
-                                  controller: _searchTextController,
-                                  inputFormatters: [
-                                    LengthLimitingTextInputFormatter(20),
-                                  ],
-                                  onChanged: (value) => filterFavourites(value),
-                                  decoration: const InputDecoration(
-                                    hintText: 'BUJU BNXN',
-                                    border: InputBorder.none,
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w400),
-                                  )),
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: ThemeData()
+                                      .colorScheme
+                                      .copyWith(primary: Color(0xff2E5F3B)),
+                                ),
+                                child: TextFormField(
+                                    controller: _searchTextController,
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(20),
+                                    ],
+                                    onChanged: (value) =>
+                                        filterFavourites(value),
+                                    decoration: const InputDecoration(
+                                      hintText: 'BUJU BNXN',
+                                      border: InputBorder.none,
+                                      hintStyle: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                              ),
                             ),
                           ),
                         ),
@@ -131,10 +139,10 @@ class FavouritesState extends State<Favourites> {
                                 itemCount: retrievedItemsList?.length ?? 0,
                                 itemBuilder: (context, position) {
                                   return FavouriteItems(
-                                    position: position,
-                                    retrievedArtItems: retrievedItemsList,
-                                    getValues: getDefaultValues,
-                                  );
+                                      position: position,
+                                      retrievedArtItems: retrievedItemsList,
+                                      getValues: getDefaultValues,
+                                      messangerKey: _messangerKey);
                                 },
                                 separatorBuilder: (context, index) => SizedBox(
                                       height: 12.0,
@@ -205,12 +213,13 @@ class FavouriteItems extends StatefulWidget {
       {Key? key,
       required this.position,
       required this.retrievedArtItems,
-      this.getValues})
+      this.getValues,
+      this.messangerKey})
       : super(key: key);
 
   final int position;
   final List<ArtItems>? retrievedArtItems;
-  final getValues;
+  final getValues, messangerKey;
 
   @override
   State<FavouriteItems> createState() => _FavouriteItemsState();
@@ -222,6 +231,7 @@ class _FavouriteItemsState extends State<FavouriteItems> {
   @override
   Widget build(BuildContext context) {
     String artPrice = '₦ 0.0';
+
     artPrice = NumberFormat.currency(locale: "en_NG", symbol: "₦")
         .format(widget.retrievedArtItems?[widget.position].artPrice);
     return InkWell(
@@ -240,51 +250,78 @@ class _FavouriteItemsState extends State<FavouriteItems> {
           widget.getValues();
         });
       },
-      child: Container(
-        decoration: const BoxDecoration(
-            color: Color(0xffEEF7F0),
-            borderRadius: BorderRadius.all(Radius.circular(15))),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              height: 100.0,
-              width: 120.0,
-              decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                child: FadeInImage.memoryNetwork(
-                  placeholder: kTransparentImage,
-                  image: widget.retrievedArtItems![widget.position].imageUrl,
-                  fit: BoxFit.cover,
+      child: Dismissible(
+        direction: DismissDirection.endToStart,
+        key: UniqueKey(),
+        onDismissed: (direction) {
+          databaseService.removeItemFromLIked(
+              widget.retrievedArtItems![widget.position].docId,
+              widget.messangerKey);
+        },
+        background: Container(
+          decoration: BoxDecoration(
+              color: Colors.red[600],
+              borderRadius: BorderRadius.all(Radius.circular(15))),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Remove Art',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.0),
+              ),
+            ),
+          ),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+              color: Color(0xffEEF7F0),
+              borderRadius: BorderRadius.all(Radius.circular(15))),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                height: 100.0,
+                width: 120.0,
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(15.0)),
+                  child: FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: widget.retrievedArtItems![widget.position].imageUrl,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              width: 50.0,
-            ),
-            Flexible(
-              child: Column(
-                children: [
-                  Text(
-                    widget.retrievedArtItems![widget.position].artName,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 20.0),
-                  ),
-                  const SizedBox(
-                    height: 7.0,
-                  ),
-                  Text(
-                    artPrice,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 17.0),
-                  ),
-                ],
+              const SizedBox(
+                width: 50.0,
               ),
-            )
-          ],
+              Flexible(
+                child: Column(
+                  children: [
+                    Text(
+                      widget.retrievedArtItems![widget.position].artName,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 20.0),
+                    ),
+                    const SizedBox(
+                      height: 7.0,
+                    ),
+                    Text(
+                      artPrice,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 17.0),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

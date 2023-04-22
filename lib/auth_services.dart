@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:art_market/signup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,11 +68,13 @@ class AuthService {
 
   Future<void> login(username, pass, context, _messangerKey) async {
     final userDet = UserDetails(username, pass);
+    FirebaseAuth auth = FirebaseAuth.instance;
 
     try {
-      final credential = await auth
+      await auth
           .signInWithEmailAndPassword(email: username, password: pass)
           .then((value) async {
+        user = auth.currentUser;
         bool userExist = await doesUserExist(user!.uid);
         if (userExist == true) {
           Navigator.pushReplacementNamed(context, '/homepage');
@@ -132,7 +136,6 @@ class AuthService {
         .limit(1)
         .get();
 
-    values.exists;
     if (values.size >= 1) {
       return true;
     } else {
@@ -167,10 +170,15 @@ class AuthService {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.red[600],
+        duration: const Duration(seconds: 5),
         elevation: 0,
         content: Text(
           errorMessage,
           textAlign: TextAlign.center,
         )));
+
+    Timer(Duration(seconds: 5), () {
+      _messangerKey.currentState!.hideCurrentSnackBar();
+    });
   }
 }

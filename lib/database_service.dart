@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:art_market/ArtItems.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -318,10 +320,15 @@ class DatabaseService {
     _messangerKey.currentState!.showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.red[600],
+        duration: const Duration(seconds: 5),
         elevation: 0,
         content: Text(
           errorMessage,
           textAlign: TextAlign.center,
         )));
+
+    Timer(Duration(seconds: 5), () {
+      _messangerKey.currentState!.hideCurrentSnackBar();
+    });
   }
 }

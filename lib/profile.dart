@@ -800,6 +800,7 @@ class _ProfileState extends State<Profile> {
     int currentYear = new DateTime.now().year;
     int currentMonth = new DateTime.now().month;
     final DateFormat formatter;
+    int artSize = 0;
     Future<List<ArtItems>> orderedItems =
         retrievedOrdersList![position].artItems;
 
@@ -924,7 +925,25 @@ class _ProfileState extends State<Profile> {
       );
     });
 
-    return Stack(children: stackLayers);
+    return Stack(
+      children: [
+        Stack(children: stackLayers),
+        Visibility(
+          visible: itemLength > 3,
+          child: Positioned(
+            bottom: 17,
+            right: 5,
+            child: Text(
+              '+' + (itemLength - 3).toString(),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22.0,
+                  color: Colors.white),
+            ),
+          ),
+        )
+      ],
+    );
   }
 
   Future<void> getDefaultValues() async {

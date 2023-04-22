@@ -3,7 +3,10 @@ import 'dart:ui';
 import 'package:art_market/ArtItems.dart';
 import 'package:art_market/database_service.dart';
 import 'package:art_market/item_details.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -19,10 +22,13 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
   DatabaseService databaseService = DatabaseService();
+  FirebaseAuth auth = FirebaseAuth.instance;
+  final _searchTextController = TextEditingController();
   Future<List<ArtItems>>? itemsList;
   List<ArtItems>? retrievedItemsList;
+  var img = null;
   String profileImageText = '';
-  bool _loading = false;
+  bool _loading = false, _imageLoaded = false;
   dynamic allBtnColor = Color(0xff69B47D),
       sketchBtnColor = Colors.white,
       paintingBtnColor = Colors.white;
@@ -35,6 +41,7 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = auth.currentUser;
     return Stack(
       children: [
         Scaffold(
@@ -49,21 +56,100 @@ class _DashboardState extends State<Dashboard> {
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      CircleAvatar(
-                        radius: 38.0,
-                        backgroundColor: Color(0xffC9E4D0),
-                        child: Text(
-                          profileImageText,
-                          style: const TextStyle(
-                              color: Color(0xff1B3823),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 23.0),
-                        ),
-                      ),
+                      _imageLoaded
+                          ? CircleAvatar(
+                              radius: 38.0,
+                              backgroundColor: Color(0xffC9E4D0),
+                              child: CachedNetworkImage(
+                                imageUrl: user?.photoURL.toString() ?? '',
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  width: 160.0,
+                                  height: 160.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                              ))
+                          : CircleAvatar(
+                              radius: 38.0,
+                              backgroundColor: Color(0xffC9E4D0),
+                              child: Text(
+                                profileImageText,
+                                style: const TextStyle(
+                                    color: Color(0xff1B3823),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 23.0),
+                              ),
+                            ),
                     ],
                   ),
                   SizedBox(
                     height: 30.0,
+                  ),
+                  Container(
+                    height: 60.0,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10.0)),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: ThemeData()
+                                      .colorScheme
+                                      .copyWith(primary: Color(0xff2E5F3B)),
+                                ),
+                                child: TextFormField(
+                                    controller: _searchTextController,
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(20),
+                                    ],
+                                    onChanged: (value) =>
+                                        filterFavourites(value),
+                                    decoration: const InputDecoration(
+                                      hintText: 'BUJU BNXN',
+                                      border: InputBorder.none,
+                                      hintStyle: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                              ),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Color(0xff2E5F3B),
+                              minimumSize: const Size(80, double.infinity),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10.0),
+                                      bottomRight: Radius.circular(10.0))),
+                            ),
+                            child: Icon(Icons.search_outlined)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20.0,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -163,7 +249,7 @@ class _DashboardState extends State<Dashboard> {
                         topLeft: Radius.circular(10)),
                     child: RefreshIndicator(
                       onRefresh: () {
-                        return getAllData();
+                        return getDefaultValues();
                       },
                       child: FutureBuilder(
                         future: itemsList,
@@ -254,22 +340,45 @@ class _DashboardState extends State<Dashboard> {
 
     itemsList = databaseService.retrieveArt();
     retrievedItemsList = await databaseService.retrieveArt();
+    getProfilePic();
 
     setState(() {
       _loading = false;
     });
   }
 
-  Future<void> getAllData() async {
-    setState(() {
-      _loading = true;
-    });
+  Future<void> getProfilePic() async {
+    final User? user = auth.currentUser;
 
-    itemsList = databaseService.retrieveArt();
-    retrievedItemsList = await databaseService.retrieveArt();
+    if (user!.photoURL?.isEmpty == null) {
+      setState(() => _imageLoaded = false);
+    } else {
+      img = Image.network(user.photoURL.toString());
+
+      img.image.resolve(ImageConfiguration()).addListener(
+          ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        if (mounted) {
+          setState(() => _imageLoaded = true);
+        }
+      }));
+    }
+  }
+
+  Future<void> filterFavourites(String enteredKeyword) async {
+    retrievedItemsList = await databaseService.retrieveFavouriteArt();
+
+    List<ArtItems> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = await databaseService.retrieveFavouriteArt();
+    } else {
+      results = retrievedItemsList!
+          .where((item) =>
+              item.artName.toLowerCase().contains(enteredKeyword.toLowerCase()))
+          .toList();
+    }
 
     setState(() {
-      _loading = false;
+      retrievedItemsList = results;
     });
   }
 }
