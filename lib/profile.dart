@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:art_market/ArtItems.dart';
 import 'package:art_market/Orders.dart';
+import 'package:art_market/orderDetails.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -62,7 +63,7 @@ class _ProfileState extends State<Profile> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20.0, 25.0, 15.0, 0),
-            child: ListView(
+            child: Column(
               children: [
                 Align(
                   alignment: Alignment.topLeft,
@@ -210,49 +211,53 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(
                   height: 20.0,
                 ),
-                FutureBuilder(
-                  future: ordersList,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<Orders>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done &&
-                        retrievedOrdersList?.isEmpty == null) {
-                      const Center(
-                        child: Text(
-                          'No Recent Orders',
-                          style: TextStyle(color: Colors.grey, fontSize: 20.0),
-                        ),
-                      );
-                    }
+                Expanded(
+                  child: FutureBuilder(
+                    future: ordersList,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Orders>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          retrievedOrdersList?.isEmpty == null) {
+                        const Center(
+                          child: Text(
+                            'No Recent Orders',
+                            style:
+                                TextStyle(color: Colors.grey, fontSize: 20.0),
+                          ),
+                        );
+                      }
 
-                    if (retrievedOrdersList?.isEmpty ?? true) {
-                      return const Center(
-                        child: Text(
-                          'No Recent Orders',
-                          style: TextStyle(color: Colors.grey, fontSize: 20.0),
-                        ),
-                      );
-                    }
+                      if (retrievedOrdersList?.isEmpty ?? true) {
+                        return const Center(
+                          child: Text(
+                            'No Recent Orders',
+                            style:
+                                TextStyle(color: Colors.grey, fontSize: 20.0),
+                          ),
+                        );
+                      }
 
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return ListView.separated(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: retrievedOrdersList?.length ?? 0,
-                          itemBuilder: (context, position) {
-                            return orderWidget(position);
-                          },
-                          separatorBuilder: (context, index) => SizedBox(
-                                height: 12.0,
-                              ));
-                    } else {
-                      return Center(
-                        child: SpinKitSquareCircle(
-                          color: Color(0xff2E5F3B),
-                          size: 100.0,
-                        ),
-                      );
-                    }
-                  },
+                      if (snapshot.hasData && snapshot.data != null) {
+                        return ListView.separated(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: retrievedOrdersList?.length ?? 0,
+                            itemBuilder: (context, position) {
+                              return orderWidget(position);
+                            },
+                            separatorBuilder: (context, index) => SizedBox(
+                                  height: 12.0,
+                                ));
+                      } else {
+                        return Center(
+                          child: SpinKitSquareCircle(
+                            color: Color(0xff2E5F3B),
+                            size: 100.0,
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 )
               ],
             ),
@@ -794,14 +799,14 @@ class _ProfileState extends State<Profile> {
         context, '/', (Route<dynamic> route) => false);
   }
 
-  Container orderWidget(int position) {
+  InkWell orderWidget(int position) {
     String amount = retrievedOrdersList![position].totalAmt;
     String status = retrievedOrdersList![position].status;
     int currentYear = new DateTime.now().year;
     int currentMonth = new DateTime.now().month;
     final DateFormat formatter;
     int artSize = 0;
-    Future<List<ArtItems>> orderedItems =
+    Future<List<ArtItems>>? orderedItems =
         retrievedOrdersList![position].artItems;
 
     if (currentYear == retrievedOrdersList![position].orderDate.year &&
@@ -825,77 +830,93 @@ class _ProfileState extends State<Profile> {
       amount = amount.substring(0, amount.indexOf('.'));
     }
 
-    return Container(
-      height: 85.0,
-      decoration: BoxDecoration(
-          color: Color(0xffEEF7F0), borderRadius: BorderRadius.circular(15.0)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-              padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
-              child: FutureBuilder(
-                  future: orderedItems,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<ArtItems>> snapshot) {
-                    if (snapshot.hasData) {
-                      return overlapped(snapshot);
-                    } else {
-                      return CircleAvatar(
-                        backgroundColor: Colors.white,
-                        radius: 27.0,
-                      );
-                    }
-                  })),
-          Flexible(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  orderDate,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey[700]),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Text(
-                  amount,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderDetails(
+              orderItems: orderedItems,
+              orderDate: orderDate,
+              status: status,
+              amount: amount,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
-            child: Container(
-              height: 35.0,
-              decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(25.0)),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      status,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
-                    )),
+        );
+      },
+      child: Container(
+        height: 85.0,
+        decoration: BoxDecoration(
+            color: Color(0xffEEF7F0),
+            borderRadius: BorderRadius.circular(15.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+                padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
+                child: FutureBuilder(
+                    future: orderedItems,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<ArtItems>> snapshot) {
+                      if (snapshot.hasData) {
+                        return overlapped(snapshot);
+                      } else {
+                        return CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 27.0,
+                        );
+                      }
+                    })),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    orderDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey[700]),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Text(
+                    amount,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-          )
-        ],
+            Padding(
+              padding: EdgeInsets.fromLTRB(15.0, 0, 8.0, 0),
+              child: Container(
+                height: 35.0,
+                decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(25.0)),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      )),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -929,12 +950,12 @@ class _ProfileState extends State<Profile> {
       children: [
         Stack(children: stackLayers),
         Visibility(
-          visible: itemLength > 3,
+          visible: (snapshot.data?.length ?? 0) > 3,
           child: Positioned(
             bottom: 17,
             right: 5,
             child: Text(
-              '+' + (itemLength - 3).toString(),
+              '+' + (snapshot.data!.length - 3).toString(),
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 22.0,
@@ -955,6 +976,14 @@ class _ProfileState extends State<Profile> {
 
     ordersList = databaseService.retrieveOrders();
     retrievedOrdersList = await databaseService.retrieveOrders();
+    retrievedOrdersList!.sort(
+      (a, b) {
+        return b.orderDate.compareTo(a.orderDate);
+      },
+    );
+    setState(() {
+      _loading = false;
+    });
     profileImageText =
         await databaseService.getImageText(context, _messangerKey);
 

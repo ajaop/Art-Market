@@ -1,6 +1,8 @@
 import 'package:art_market/address_page.dart';
 import 'package:art_market/dashboard.dart';
+import 'package:art_market/orderDetails.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'ArtItems.dart';
 
@@ -9,11 +11,13 @@ class OrderSuccess extends StatefulWidget {
       {Key? key,
       required this.title,
       required this.amount,
-      required this.retrievedItemsList})
+      required this.retrievedItemsList,
+      required this.itemsList})
       : super(key: key);
   final String title;
   final String amount;
   final List<ArtItems>? retrievedItemsList;
+  final Future<List<ArtItems>>? itemsList;
 
   @override
   State<OrderSuccess> createState() => _OrderSuccessState();
@@ -26,9 +30,13 @@ class _OrderSuccessState extends State<OrderSuccess> {
   var dialogIcon = Icons.check;
   var orderTitle = '', orderDescription = '', orderBtn = '';
   bool orderSuccess = true;
+  final DateFormat formatter = DateFormat('dd, E H:m');
 
   @override
   Widget build(BuildContext context) {
+    String status = 'Ordered';
+    final String orderDate = formatter.format(DateTime.now());
+
     if (widget.title.contains('SUCCESS')) {
       setState(() {
         dialogColor = Colors.green[700];
@@ -126,7 +134,12 @@ class _OrderSuccessState extends State<OrderSuccess> {
                           ? Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: ((context) => Dashboard())))
+                                  builder: ((context) => OrderDetails(
+                                        orderItems: widget.itemsList,
+                                        orderDate: orderDate,
+                                        status: status,
+                                        amount: widget.amount,
+                                      ))))
                           : Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -134,6 +147,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                                         amount: widget.amount,
                                         retrievedItemsList:
                                             widget.retrievedItemsList,
+                                        itemsList: widget.itemsList,
                                       ))));
                     },
                     child: Text(orderBtn))

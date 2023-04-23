@@ -273,7 +273,7 @@ class DatabaseService {
                 .doc(id)
                 .collection('Items')
                 .doc()
-                .set(artItem.toMap());
+                .set(artItem.cartToMap());
           }
         }).then((value) async {
           await deleteCart(_messangerKey);

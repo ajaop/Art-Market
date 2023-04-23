@@ -1,3 +1,4 @@
+import 'package:art_market/signin.dart';
 import 'package:art_market/user_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -285,7 +286,11 @@ class _SignUpState extends State<SignUp> {
                                 style: TextButton.styleFrom(
                                     primary: Color(0xff418653)),
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: ((context) =>
+                                              const SignIn())));
                                 },
                                 child: const Text('Sign in')),
                           ],

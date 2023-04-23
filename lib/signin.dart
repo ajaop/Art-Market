@@ -187,7 +187,7 @@ class _SignInState extends State<SignIn> {
                               style: TextButton.styleFrom(
                                   primary: Color(0xff418653)),
                               onPressed: () {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                         builder: ((context) =>

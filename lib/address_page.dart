@@ -16,10 +16,14 @@ import 'database_service.dart';
 
 class AddressPage extends StatefulWidget {
   const AddressPage(
-      {Key? key, required this.amount, required this.retrievedItemsList})
+      {Key? key,
+      required this.amount,
+      required this.retrievedItemsList,
+      required this.itemsList})
       : super(key: key);
   final String amount;
   final List<ArtItems>? retrievedItemsList;
+  final Future<List<ArtItems>>? itemsList;
 
   @override
   State<AddressPage> createState() => _AddressPageState();
@@ -886,27 +890,25 @@ class _AddressPageState extends State<AddressPage> {
                                 widget.amount,
                                 _messangerKey);
                             if (addOrder == true) {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: ((context) => OrderSuccess(
-                                            title: 'SUCCESS',
-                                            amount: widget.amount,
-                                            retrievedItemsList:
-                                                widget.retrievedItemsList,
-                                          ))),
-                                  (Route<dynamic> route) => route.isFirst);
+                                          title: 'SUCCESS',
+                                          amount: widget.amount,
+                                          retrievedItemsList:
+                                              widget.retrievedItemsList,
+                                          itemsList: widget.itemsList))));
                             } else {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: ((context) => OrderSuccess(
-                                            title: 'FAILURE',
-                                            amount: widget.amount,
-                                            retrievedItemsList:
-                                                widget.retrievedItemsList,
-                                          ))),
-                                  (Route<dynamic> route) => route.isFirst);
+                                          title: 'FAILURE',
+                                          amount: widget.amount,
+                                          retrievedItemsList:
+                                              widget.retrievedItemsList,
+                                          itemsList: widget.itemsList))));
                             }
                             setState(() {
                               _loading = false;

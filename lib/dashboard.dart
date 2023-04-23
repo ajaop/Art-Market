@@ -121,7 +121,7 @@ class _DashboardState extends State<Dashboard> {
                                     onChanged: (value) =>
                                         filterFavourites(value),
                                     decoration: const InputDecoration(
-                                      hintText: 'BUJU BNXN',
+                                      hintText: 'Art Market',
                                       border: InputBorder.none,
                                       hintStyle: TextStyle(
                                           color: Colors.grey,

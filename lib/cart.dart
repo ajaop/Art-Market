@@ -203,6 +203,7 @@ class _CartState extends State<Cart> {
                                               amount: totalText,
                                               retrievedItemsList:
                                                   retrievedItemsList,
+                                              itemsList: itemsList,
                                             ))).then((value) {
                                   getDefaultValues();
                                 });
@@ -243,6 +244,9 @@ class _CartState extends State<Cart> {
     if (retrievedItemsList?.isEmpty ?? true) {
       setState(() {
         _empty = true;
+        subTotalText = "₦ 0.0";
+        vatText = "₦ 0.0";
+        totalText = "₦ 0.0";
       });
     }
 

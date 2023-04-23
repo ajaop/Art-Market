@@ -39,7 +39,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               Column(
                 children: [
                   Container(
-                      height: 500.0,
+                      height: 400.0,
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('images/onboarding_image.jpg'),
