@@ -4,6 +4,11 @@ A mobile application created using flutter which allows artistes to share their 
 ## Authentication
 Firebase Auth was used for user authentication. 
 
+# App Video
+[![APP VIDEO ON LINKEDIN]](https://www.linkedin.com/posts/ajao-semiloore-880889220_flutterdeveloper-activity-7056022071029473280-JCs6?utm_source=share&utm_medium=member_desktop)
+
+
+
 # App Images
 
 ## Onboarding Screen
