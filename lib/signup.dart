@@ -247,7 +247,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                primary: Color(0xff2E5F3B),
+                                backgroundColor: Color(0xff2E5F3B),
                                 minimumSize: const Size.fromHeight(55),
                                 textStyle: const TextStyle(
                                     color: Colors.white,
@@ -274,7 +274,8 @@ class _SignUpState extends State<SignUp> {
                                     }
                                   }
                                 : null,
-                            child: Text(buttonText)),
+                            child: Text(buttonText,
+                                style: TextStyle(color: Colors.white))),
                         const SizedBox(
                           height: 10.0,
                         ),
@@ -284,7 +285,7 @@ class _SignUpState extends State<SignUp> {
                             const Text("Already have an account ?"),
                             TextButton(
                                 style: TextButton.styleFrom(
-                                    primary: Color(0xff418653)),
+                                    backgroundColor: Color(0xff418653)),
                                 onPressed: () {
                                   Navigator.pushReplacement(
                                       context,
@@ -292,7 +293,8 @@ class _SignUpState extends State<SignUp> {
                                           builder: ((context) =>
                                               const SignIn())));
                                 },
-                                child: const Text('Sign in')),
+                                child: const Text('Sign in',
+                                    style: TextStyle(color: Colors.white))),
                           ],
                         )
                       ],

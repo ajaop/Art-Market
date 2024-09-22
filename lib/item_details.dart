@@ -180,7 +180,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          primary: Color(0xff2E5F3B),
+                          backgroundColor: Color(0xff2E5F3B),
                           minimumSize: const Size.fromHeight(57),
                           textStyle: const TextStyle(
                               color: Colors.white,
@@ -198,7 +198,10 @@ class _ItemDetailsState extends State<ItemDetails> {
                               });
                               await addItemToCart();
                             },
-                      child: Text(buttonText)),
+                      child: Text(
+                        buttonText,
+                        style: TextStyle(color: Colors.white),
+                      )),
                 ),
               ],
             ),

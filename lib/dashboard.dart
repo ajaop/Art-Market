@@ -137,14 +137,17 @@ class _DashboardState extends State<Dashboard> {
                               FocusManager.instance.primaryFocus?.unfocus();
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Color(0xff2E5F3B),
+                              backgroundColor: Color(0xff2E5F3B),
                               minimumSize: const Size(80, double.infinity),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
                                       topRight: Radius.circular(10.0),
                                       bottomRight: Radius.circular(10.0))),
                             ),
-                            child: Icon(Icons.search_outlined)),
+                            child: Icon(
+                              Icons.search_outlined,
+                              color: Colors.white,
+                            )),
                       ],
                     ),
                   ),
@@ -174,7 +177,7 @@ class _DashboardState extends State<Dashboard> {
                         child: const Text('All',
                             style: TextStyle(color: Color(0xff1B3823))),
                         style: ElevatedButton.styleFrom(
-                            primary: allBtnColor,
+                            backgroundColor: allBtnColor,
                             shape: const StadiumBorder(),
                             side:
                                 BorderSide(color: Color(0xff418653), width: 2)),
@@ -202,7 +205,7 @@ class _DashboardState extends State<Dashboard> {
                         child: const Text('Sketches',
                             style: TextStyle(color: Color(0xff1B3823))),
                         style: ElevatedButton.styleFrom(
-                            primary: sketchBtnColor,
+                            backgroundColor: sketchBtnColor,
                             shape: const StadiumBorder(),
                             side:
                                 BorderSide(color: Color(0xff418653), width: 2)),
@@ -232,7 +235,7 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(color: Color(0xff1B3823)),
                         ),
                         style: ElevatedButton.styleFrom(
-                            primary: paintingBtnColor,
+                            backgroundColor: paintingBtnColor,
                             shape: const StadiumBorder(),
                             side:
                                 BorderSide(color: Color(0xff418653), width: 2)),

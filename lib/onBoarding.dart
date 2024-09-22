@@ -82,7 +82,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                             ),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    primary: Color(0xff2E5F3B),
+                                    backgroundColor: Color(0xff2E5F3B),
                                     minimumSize: const Size.fromHeight(65),
                                     textStyle: const TextStyle(
                                         color: Colors.white,

@@ -4,8 +4,6 @@ import 'package:art_market/order_success_page.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_credit_card/credit_card_brand.dart';
-import 'package:flutter_credit_card/credit_card_widget.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -405,7 +403,7 @@ class _AddressPageState extends State<AddressPage> {
             ),
             ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    primary: addressBtnColor,
+                    backgroundColor: addressBtnColor,
                     minimumSize: const Size.fromHeight(65),
                     textStyle: const TextStyle(
                         color: Colors.white,
@@ -429,7 +427,7 @@ class _AddressPageState extends State<AddressPage> {
                     SizedBox(
                       width: 5.0,
                     ),
-                    Text(addressBtnText),
+                    Text(addressBtnText, style: TextStyle(color: Colors.white)),
                     Icon(Icons.arrow_forward_ios),
                   ],
                 ))
@@ -523,59 +521,6 @@ class _AddressPageState extends State<AddressPage> {
             isExpiryDateVisible: true,
             cardHolderName: cardName,
             expiryDate: expDate,
-            themeColor: Color(0xffC9E4D0),
-            textColor: Colors.black,
-            cardNumberDecoration: InputDecoration(
-              labelText: 'Card Number',
-              hintText: 'XXXX XXXX XXXX XXXX',
-              hintStyle: const TextStyle(color: Colors.grey),
-              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.black)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
-              ),
-            ),
-            expiryDateDecoration: InputDecoration(
-              hintStyle: const TextStyle(color: Colors.grey),
-              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.black)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
-              ),
-              labelText: 'Expiry Date',
-              hintText: 'XX/XX',
-            ),
-            cvvCodeDecoration: InputDecoration(
-              hintStyle: const TextStyle(color: Colors.grey),
-              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.black)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
-              ),
-              labelText: 'CVV',
-              hintText: 'XXX',
-            ),
-            cardHolderDecoration: InputDecoration(
-              hintStyle: const TextStyle(color: Colors.grey),
-              labelStyle: const TextStyle(color: Color(0xff2E5F3B)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.black)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(width: 2, color: Color(0xff2E5F3B)),
-              ),
-              labelText: 'Card Holder',
-            ),
             onCreditCardModelChange: onCreditCardModelChange,
           ),
           SizedBox(
@@ -583,7 +528,7 @@ class _AddressPageState extends State<AddressPage> {
           ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  primary: paymentBtnColor,
+                  backgroundColor: paymentBtnColor,
                   minimumSize: const Size.fromHeight(65),
                   textStyle: const TextStyle(
                       color: Colors.white,
@@ -607,7 +552,7 @@ class _AddressPageState extends State<AddressPage> {
                   SizedBox(
                     width: 5.0,
                   ),
-                  Text(paymentBtnTex),
+                  Text(paymentBtnTex, style: TextStyle(color: Colors.white)),
                   Icon(Icons.arrow_forward_ios),
                 ],
               ))
@@ -869,7 +814,7 @@ class _AddressPageState extends State<AddressPage> {
                 ),
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: Color(0xff2E5F3B),
+                        backgroundColor: Color(0xff2E5F3B),
                         minimumSize: const Size.fromHeight(65),
                         textStyle: const TextStyle(
                             color: Colors.white,
@@ -914,7 +859,8 @@ class _AddressPageState extends State<AddressPage> {
                               _loading = false;
                             });
                           },
-                    child: Text('Place Order'))
+                    child: Text('Place Order',
+                        style: TextStyle(color: Colors.white)))
               ],
             )
           ],

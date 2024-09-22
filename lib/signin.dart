@@ -149,7 +149,7 @@ class _SignInState extends State<SignIn> {
                       ),
                       ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              primary: const Color(0xff2E5F3B),
+                              backgroundColor: const Color(0xff2E5F3B),
                               minimumSize: const Size.fromHeight(55),
                               textStyle: const TextStyle(
                                   color: Colors.white,
@@ -175,7 +175,10 @@ class _SignInState extends State<SignIn> {
                                   }
                                 }
                               : null,
-                          child: const Text('Sign in')),
+                          child: const Text(
+                            'Sign in',
+                            style: TextStyle(color: Colors.white),
+                          )),
                       const SizedBox(
                         height: 10.0,
                       ),
@@ -185,7 +188,7 @@ class _SignInState extends State<SignIn> {
                           const Text("Dont have an account ?"),
                           TextButton(
                               style: TextButton.styleFrom(
-                                  primary: Color(0xff418653)),
+                                  backgroundColor: Color(0xff418653)),
                               onPressed: () {
                                 Navigator.pushReplacement(
                                     context,
@@ -193,7 +196,8 @@ class _SignInState extends State<SignIn> {
                                         builder: ((context) =>
                                             const SignUp())));
                               },
-                              child: const Text('Sign up'))
+                              child: const Text('Sign up',
+                                  style: TextStyle(color: Colors.white)))
                         ],
                       )
                     ]),

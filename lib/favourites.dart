@@ -87,7 +87,7 @@ class FavouritesState extends State<Favourites> {
                               FocusManager.instance.primaryFocus?.unfocus();
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Color(0xff2E5F3B),
+                              backgroundColor: Color(0xff2E5F3B),
                               minimumSize: const Size(80, double.infinity),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(

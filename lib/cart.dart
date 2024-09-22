@@ -183,7 +183,7 @@ class _CartState extends State<Cart> {
                     ),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: Color(0xff2E5F3B),
+                            backgroundColor: Color(0xff2E5F3B),
                             minimumSize: const Size.fromHeight(65),
                             textStyle: const TextStyle(
                                 color: Colors.white,
@@ -214,7 +214,10 @@ class _CartState extends State<Cart> {
                             SizedBox(
                               width: 5.0,
                             ),
-                            Text('CHECKOUT'),
+                            Text(
+                              'CHECKOUT',
+                              style: TextStyle(color: Colors.white),
+                            ),
                             Icon(Icons.arrow_forward_ios),
                           ],
                         ))
@@ -359,7 +362,7 @@ class _CartItemsState extends State<CartItems> {
               ),
             ),
             const SizedBox(
-              width: 30.0,
+              width: 25.0,
             ),
             Flexible(
               child: Column(

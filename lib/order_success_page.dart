@@ -119,7 +119,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                 ),
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: dialogColor2,
+                        backgroundColor: dialogColor2,
                         minimumSize: const Size.fromHeight(65),
                         textStyle: const TextStyle(
                             color: Colors.white,

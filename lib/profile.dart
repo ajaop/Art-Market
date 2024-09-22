@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:ui';
+import 'dart:ui' as size;
 
 import 'package:art_market/ArtItems.dart';
 import 'package:art_market/Orders.dart';
@@ -486,8 +486,8 @@ class _ProfileState extends State<Profile> {
                     ),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: Color(0xff2E5F3B),
-                            minimumSize: const Size.fromHeight(65),
+                            backgroundColor: Color(0xff2E5F3B),
+                            minimumSize: size.Size.fromHeight(65),
                             textStyle: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -656,8 +656,8 @@ class _ProfileState extends State<Profile> {
                     ),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: Color(0xff2E5F3B),
-                            minimumSize: const Size.fromHeight(65),
+                            backgroundColor: Color(0xff2E5F3B),
+                            minimumSize: const size.Size.fromHeight(65),
                             textStyle: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -726,8 +726,8 @@ class _ProfileState extends State<Profile> {
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             elevation: 5.0,
-                            primary: Color.fromARGB(255, 183, 181, 181),
-                            minimumSize: const Size(100, 50),
+                            backgroundColor: Color.fromARGB(255, 183, 181, 181),
+                            minimumSize: const size.Size(100, 50),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0))),
                         onPressed: () {
@@ -740,8 +740,8 @@ class _ProfileState extends State<Profile> {
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             elevation: 5.0,
-                            primary: Color(0xff2E5F3B),
-                            minimumSize: const Size(100, 50),
+                            backgroundColor: Color(0xff2E5F3B),
+                            minimumSize: const size.Size(100, 50),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0))),
                         onPressed: () {
@@ -1044,8 +1044,8 @@ class _ProfileState extends State<Profile> {
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           elevation: 5.0,
-                          primary: Color.fromARGB(255, 246, 241, 241),
-                          minimumSize: const Size(150, 65),
+                          backgroundColor: Color.fromARGB(255, 246, 241, 241),
+                          minimumSize: const size.Size(150, 65),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0)),
                         ),
@@ -1074,8 +1074,8 @@ class _ProfileState extends State<Profile> {
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             elevation: 5.0,
-                            primary: Color.fromARGB(255, 241, 239, 239),
-                            minimumSize: const Size(150, 65),
+                            backgroundColor: Color.fromARGB(255, 241, 239, 239),
+                            minimumSize: const size.Size(150, 65),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0))),
                         onPressed: () {
